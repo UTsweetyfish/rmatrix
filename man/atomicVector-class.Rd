@@ -1,7 +1,15 @@
 \name{atomicVector-class}
-\docType{class}
-\alias{atomicVector-class}
 \title{Virtual Class "atomicVector" of Atomic Vectors}
+%
+\docType{class}
+\keyword{classes}
+%
+\alias{atomicVector-class}
+%
+\alias{Ops,atomicVector,sparseVector-method}
+\alias{coerce,atomicVector,dsparseVector-method}
+\alias{coerce,atomicVector,sparseVector-method}
+%
 \description{
   The \code{\link{class}} \code{"atomicVector"} is a
   \emph{virtual} class containing all atomic vector classes of base \R,
@@ -29,4 +37,3 @@
 \examples{
 showClass("atomicVector")
 }
-\keyword{classes}

@@ -1,138 +1,126 @@
-#### eigen() , Schur() etc
-#### =====     =====
+## METHODS FOR GENERIC: Schur
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-## eigen() is not even generic, and we haven't any C code,
-## NOTE  base::eigen()  "magically"  can work via as.matrix()
-if(.Matrix.avoiding.as.matrix) {
-    ## ---- IFF  as.matrix(.)  <==>  as(., "matrix")  [which we consider _deprecating_]
-    ## FIXME: Code for *sparse* !! [RcppEigen ~??~]
-    setMethod("eigen", signature(x = "Matrix", only.values = "missing"),
-	      function(x, symmetric, only.values, EISPACK) # << must match generic
-		  base::eigen(as(x,"matrix"), symmetric, FALSE))
-    setMethod("eigen", signature(x = "Matrix", only.values = "logical"),
-	      function(x, symmetric, only.values, EISPACK)
-		  base::eigen(as(x,"matrix"), symmetric, only.values))
+setMethod("Schur", signature(x = "dgeMatrix"),
+          function(x, vectors = TRUE, ...) {
+              if(length(x.x <- x@x) && !all(is.finite(range(x.x))))
+                  stop(gettextf("'%s' has non-finite values", "x"), domain = NA)
+              cl <- .Call(dgeMatrix_Schur, x, vectors, TRUE)
+              if(all(cl$WI == 0)) {
+                  vals <- cl$WR
+                  T <- triu(cl$T)
+              } else {
+                  vals <- complex(real = cl$WR, imaginary = cl$WI)
+                  T <- .m2dense(cl$T, ",ge")
+              }
+              if(vectors)
+                  new("Schur", Dim = x@Dim, Dimnames = x@Dimnames,
+                      Q = .m2dense(cl$Z, ",ge"), T = T, EValues = vals)
+              else list(T = T, EValues = vals)
+          })
 
-    ## base::svd()  using  as.matrix() :=  asRbasematrix()
-    if(getRversion() < "3.5.0") # svd not yet implicit generic
-    setGeneric("svd", function(x, ...) base::svd(x, ...))
-    setMethod("svd", "Matrix",
-	      function (x, ...) base::svd(as(x,"matrix"), ...))
-}
+setMethod("Schur", signature(x = "dsyMatrix"),
+          function(x, vectors = TRUE, ...) {
+              e <- eigen(x, symmetric = TRUE, only.values = !vectors)
+              vals <- as.double(e$values)
+              T <- new("ddiMatrix", Dim = x@Dim, x = vals)
+              if(vectors)
+                  new("Schur", Dim = x@Dim, Dimnames = symDN(x@Dimnames),
+                      Q = .m2dense(e$vectors, ",ge"), T = T, EValues = vals)
+              else list(T = T, EValues = vals)
+          })
 
-.dgeSchur <- function(x, vectors, ...) {
-    cl <- .Call(dgeMatrix_Schur, x, TRUE, TRUE)
-    realEV <- all(cl$WI == 0)
-    ## TODO: do all this in C
-    new("Schur", Dim = x@Dim,
-	Q = as(cl$Z, "dgeMatrix"),
-	T = as(cl$T, if(realEV)"dtrMatrix" else "dgeMatrix"),
-	EValues = if(realEV) cl$WR else complex(real = cl$WR, imaginary = cl$WI))
-}
-setMethod("Schur", signature(x = "dgeMatrix", vectors = "missing"),
-	  .dgeSchur)
+setMethod("Schur", signature(x = "matrix"),
+          function(x, vectors = TRUE, ...) {
+              ## FIXME: wrong for complex, but package 'control' seems to
+              ##        rely on the complex->double coercion (!?)
+              storage.mode(x) <- "double"
+              if(length(x) && !all(is.finite(range(x))))
+                  stop(gettextf("'%s' has non-finite values", "x"), domain = NA)
+              cl <- .Call(dgeMatrix_Schur, x, vectors, FALSE)
+              vals <-
+                  if(all(cl$WI == 0))
+                      cl$WR
+                  else complex(real = cl$WR, imaginary = cl$WI)
+              if(vectors)
+                  list(Q = cl$Z, T = cl$T, EValues = vals)
+              else list(T = cl$T, EValues = vals)
+          })
 
-setMethod("Schur", signature(x = "dgeMatrix", vectors = "logical"),
-	  function(x, vectors, ...) {
-	      if(vectors) .dgeSchur(x)
-	      else {
-		  cl <- .Call(dgeMatrix_Schur, x, FALSE, TRUE)
-		  realEV <- all(cl$WI == 0)
-		  list(T = as(cl$T, if(realEV) "dtrMatrix" else "dgeMatrix"),
-		       EValues =
-                       if(realEV) cl$WR else complex(real = cl$WR, imaginary = cl$WI))
-	      }})
+## FIXME: don't coerce from sparse to dense
+setMethod("Schur", signature(x = "generalMatrix"),
+          function(x, vectors = TRUE, ...)
+              Schur(.M2unpacked(.M2kind(x, ",")), vectors, ...))
 
-## Ok, for the faint of heart, also provide "matrix" methods :
-.mSchur <- function(x, vectors, ...) {
-    cl <- .Call(dgeMatrix_Schur, x, TRUE, FALSE)
-    list(Q = cl$Z,
-	 T = cl$T,
-	 EValues = if(all(cl$WI == 0)) cl$WR
-	 else complex(real = cl$WR, imaginary = cl$WI))
-}
-setMethod("Schur", signature(x = "matrix", vectors = "missing"), .mSchur)
+## FIXME: don't coerce from sparse to dense
+setMethod("Schur", signature(x = "symmetricMatrix"),
+          function(x, vectors = TRUE, ...)
+              Schur(.M2unpacked(.M2kind(x, ",")), vectors, ...))
 
-setMethod("Schur", signature(x = "matrix", vectors = "logical"),
-	  function(x, vectors, ...) {
-	      if(vectors) .mSchur(x)
-	      else {
-		  cl <- .Call(dgeMatrix_Schur, x, FALSE, FALSE)
-		  EV <- if(all(cl$WI == 0)) cl$WR
-			else complex(real = cl$WR, imaginary = cl$WI)
-		  cl$WR <- cl$WI <- NULL
-		  cl$EValues <- EV
-		  cl
-	      }})
+setMethod("Schur", signature(x = "triangularMatrix"),
+          function(x, vectors = TRUE, ...) {
+              x <- .M2kind(x, ",")
+              n <- (d <- x@Dim)[1L]
+              if(n == 0L)
+                  x@uplo <- "U"
+              else if(.M.kind(x) != "n" && !all(is.finite(range(x))))
+                  stop(gettextf("'%s' has non-finite values", "x"), domain = NA)
+              vals <- diag(x, names = FALSE)
+              if(x@uplo == "U") {
+                  if(vectors) {
+                      Q <- new("ddiMatrix", Dim = d, diag = "U")
+                      new("Schur", Dim = d, Dimnames = x@Dimnames,
+                          Q = Q, T = x, EValues = vals)
+                  } else list(T = x, EValues = vals)
+              } else {
+                  perm <- n:1L
+                  vals <- vals[perm]
+                  T <- triu(x[perm, perm, drop = FALSE])
+                  if(vectors) {
+                      Q <- new("pMatrix", Dim = d, perm = perm)
+                      new("Schur", Dim = d, Dimnames = x@Dimnames,
+                          Q = Q, T = T, EValues = vals)
+                  } else list(T = x, EValues = vals)
+              }
+          })
 
-
-Schur.dsy <- function(x, vectors, ...)
-{
-    if(missing(vectors)) vectors <- TRUE
-    ## TODO: do all this in C
-    ## Should directly call LAPACK dsyev()
-    evl <- eigen(x, only.values = !vectors)
-    eVals <- evl$values
-    if(vectors)
-	new("Schur", Dim = x@Dim,
-	    Q = as(evl$vectors, "dgeMatrix"),
-	    T = Diagonal(x = eVals),
-	    EValues = eVals)
-    else
-	list(T = Diagonal(x = eVals), EValues = eVals)
-}
-
-setMethod("Schur", signature(x = "dsyMatrix", vectors = "ANY"), Schur.dsy)
-
-## FIXME(?) these  coerce from sparse to *dense*
-setMethod("Schur", signature(x = "generalMatrix", vectors = "missing"),
-	  function(x, vectors, ...) callGeneric(as(x, "dgeMatrix")))
-setMethod("Schur", signature(x = "generalMatrix", vectors = "logical"),
-	  function(x, vectors, ...) callGeneric(as(x, "dgeMatrix"), vectors))
-
-setMethod("Schur", signature(x = "symmetricMatrix", vectors = "missing"),
-	  function(x, vectors, ...) Schur.dsy(as(x, "dsyMatrix")))
-setMethod("Schur", signature(x = "symmetricMatrix", vectors = "logical"),
-	  function(x, vectors, ...) Schur.dsy(as(x, "dsyMatrix"), vectors))
+setMethod("Schur", signature(x = "diagonalMatrix"),
+          function(x, vectors = TRUE, ...) {
+              x <- .M2kind(x, ",")
+              d <- x@Dim
+              if(x@diag != "N") {
+                  vals <- rep.int(1, d[1L])
+                  T <- new("ddiMatrix", Dim = d, diag = "U")
+              } else {
+                  vals <- x@x
+                  if(length(vals) && !all(is.finite(range(vals))))
+                      stop(gettextf("'%s' has non-finite values", "x"), domain = NA)
+                  T <- new("ddiMatrix", Dim = d, x = vals)
+              }
+              if(vectors) {
+                  Q <- new("ddiMatrix", Dim = d, diag = "U")
+                  new("Schur", Dim = d, Dimnames = x@Dimnames,
+                      Q = Q, T = T, EValues = vals)
+              } else list(T = T, EValues = vals)
+          })
 
 
-## Schur(<diagonal>) : {Note that the Schur decomposition is not unique here}
-.simpleSchur <- function(x, vectors, ...) {
-    x <- as(x, "dMatrix")
-    d <- dim(x)
-    new("Schur", Dim = d, Q = Diagonal(d[1]), T = x, EValues = diag(x))
-}
-setMethod("Schur", signature(x = "diagonalMatrix", vectors = "missing"),
-	  .simpleSchur)
+## METHODS FOR CLASS: Schur
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-setMethod("Schur", signature(x = "diagonalMatrix", vectors = "logical"),
-	  function(x, vectors, ...) {
-	      if(vectors) .simpleSchur(x)
-	      else {
-		  x <- as(x, "dMatrix")
-		  list(T = x, EValues = x@x)
-	      }})
+setMethod("expand1", signature(x = "Schur"),
+          function(x, which, ...)
+              switch(which, "Q" = x@Q, "T" = x@T, "Q." = t(x@Q),
+                     stop(gettextf("'%1$s' is not \"%2$s\", \"%3$s\", or \"%2$s.\"",
+                                   "which", "Q", "T"),
+                          domain = NA)))
 
-.triSchur <- function(x, vectors, ...) {
-    x <- as(x, "dMatrix")
-    d <- dim(x)
-    n <- d[1]
-    if(x@uplo == "U" || n == 0)
-	new("Schur", Dim = d, Q = Diagonal(n), T = x, EValues = diag(x))
-    else {
-	i <- n:1
-	new("Schur", Dim = d, Q = as(i, "pMatrix"),
-	    T = t(t(x)[i,i]), EValues = diag(x)[i])
-    }
-}
-
-setMethod("Schur", signature(x = "triangularMatrix", vectors = "missing"),
-	  .triSchur)
-
-setMethod("Schur", signature(x = "triangularMatrix", vectors = "logical"),
-	  function(x, vectors, ...) {
-	      if(vectors) .triSchur(x)
-	      else {
-		  x <- as(x, "dMatrix")
-		  list(T = x, EValues = x@x)
-	      }})
+setMethod("expand2", signature(x = "Schur"),
+          function(x, ...) {
+              Q  <- x@Q
+              Q. <- t(Q)
+              dn <- x@Dimnames
+              Q @Dimnames <- c(dn[1L], list(NULL))
+              Q.@Dimnames <- c(list(NULL), dn[2L])
+              list(Q = Q, T = x@T, Q. = Q.)
+          })

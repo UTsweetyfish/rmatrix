@@ -1,244 +1,131 @@
-#### Collect methods for  colSums(), rowSums(), colMeans(), rowMeans() here.
-####			  =======    -------    --------    --------
+## METHODS FOR GENERIC: colSums, rowSums, colMeans, rowMeans
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-## Utilities:
+## ==== denseMatrix ====================================================
 
-## .as.dgC.Fun <- function(x, na.rm = FALSE, dims = 1, sparseResult = FALSE) {
-##     x <- as(x, "dgCMatrix")
-##     callGeneric()
-## }
+setMethod("colSums",  signature(x = "denseMatrix"),
+          function(x, na.rm = FALSE, dims = 1L, ...)
+              .Call(R_dense_marginsum, x, 1L, na.rm, FALSE))
+setMethod("colMeans", signature(x = "denseMatrix"),
+          function(x, na.rm = FALSE, dims = 1L, ...)
+              .Call(R_dense_marginsum, x, 1L, na.rm,  TRUE))
+setMethod("rowSums",  signature(x = "denseMatrix"),
+          function(x, na.rm = FALSE, dims = 1L, ...)
+              .Call(R_dense_marginsum, x, 0L, na.rm, FALSE))
+setMethod("rowMeans", signature(x = "denseMatrix"),
+          function(x, na.rm = FALSE, dims = 1L, ...)
+              .Call(R_dense_marginsum, x, 0L, na.rm,  TRUE))
 
-## .as.dgT.Fun <- function(x, na.rm = FALSE, dims = 1, sparseResult = FALSE) {
-##     x <- as(x, "dgTMatrix")
-##     callGeneric()
-## }
 
-.as.d.Fun <- function(x, na.rm = FALSE, dims = 1) {
-    x <- as(x, "dMatrix")
-    callGeneric()
+## ==== sparseMatrix ===================================================
+
+## ---- [CRT]sparseMatrix ----------------------------------------------
+
+for (.cl in paste0(c("C", "R", "T"), "sparseMatrix")) {
+setMethod("colSums",  signature(x = .cl),
+          function(x, na.rm = FALSE, dims = 1L, sparseResult = FALSE, ...)
+              .Call(R_sparse_marginsum, x, 1L, na.rm, FALSE, sparseResult))
+setMethod("colMeans", signature(x = .cl),
+          function(x, na.rm = FALSE, dims = 1L, sparseResult = FALSE, ...)
+              .Call(R_sparse_marginsum, x, 1L, na.rm,  TRUE, sparseResult))
+setMethod("rowSums",  signature(x = .cl),
+          function(x, na.rm = FALSE, dims = 1L, sparseResult = FALSE, ...)
+              .Call(R_sparse_marginsum, x, 0L, na.rm, FALSE, sparseResult))
+setMethod("rowMeans", signature(x = .cl),
+          function(x, na.rm = FALSE, dims = 1L, sparseResult = FALSE, ...)
+              .Call(R_sparse_marginsum, x, 0L, na.rm,  TRUE, sparseResult))
 }
+rm(.cl)
 
-.as.dge.Fun <- function(x, na.rm = FALSE, dims = 1) {
-    x <- as(x, "dgeMatrix")
-    callGeneric()
+
+## ---- diagonalMatrix -------------------------------------------------
+
+.diag.cS <- .diag.rS <- function(x, na.rm = FALSE, dims = 1L, ...) {
+    kind <- .M.kind(x)
+    if((n <- x@Dim[1L]) == 0L)
+        return(vector(switch(kind, "z" = "complex", "d" = , "i" = "double", "integer"), 0L))
+    else if(x@diag != "N")
+        r <- rep.int(switch(kind, "z" = 1+0i, "d" = , "i" = 1, 1L), n)
+    else {
+        r <- switch(kind, "z" = , "d" = x@x, "i" = as.double(x@x), as.integer(x@x))
+        if((na.rm || kind == "n") && anyNA(r))
+            r[is.na(r)] <- switch(kind, "z" = 0+0i, "d" = , "i" = 0, "n" = 1L, 0L)
+    }
+    if(!is.null(nms <- x@Dimnames[[.MARGIN]]))
+        names(r) <- nms
+    r
 }
+body(.diag.cS) <- do.call(substitute, list(body(.diag.cS), list(.MARGIN = 2L)))
+body(.diag.rS) <- do.call(substitute, list(body(.diag.rS), list(.MARGIN = 1L)))
 
-.as.gC.Fun <- function(x, na.rm = FALSE, dims = 1, sparseResult = FALSE) {
-    x <- as_gCsimpl(x)
-    callGeneric()
+.diag.cM <- .diag.rM <- function(x, na.rm = FALSE, dims = 1L, ...) {
+    kind <- .M.kind(x)
+    if((n <- x@Dim[1L]) == 0L)
+        return(vector(switch(kind, "z" = "complex", "double"), 0L))
+    else if(x@diag != "N")
+        r <- rep.int(switch(kind, "z" = 1+0i, 1) / n, n)
+    else {
+        r <- x@x / n
+        if((na.rm || kind == "n") && anyNA(r))
+            r[is.na(r)] <- switch(kind,
+                                  "z" = if(n == 1L) NaN * (0+0i) else 0+0i,
+                                  "n" = 1 / n,
+                                  if(n == 1L) NaN else 0)
+    }
+    if(!is.null(nms <- x@Dimnames[[.MARGIN]]))
+        names(r) <- nms
+    r
 }
+body(.diag.cM) <- do.call(substitute, list(body(.diag.cM), list(.MARGIN = 2L)))
+body(.diag.rM) <- do.call(substitute, list(body(.diag.rM), list(.MARGIN = 1L)))
 
-.as.C.Fun <- function(x, na.rm = FALSE, dims = 1, sparseResult = FALSE) {
-    x <- as(x, "CsparseMatrix") ## or if necessary  as_Csparse(.)
-    callGeneric()
-}
+setMethod("colSums",  signature(x = "diagonalMatrix"), .diag.cS)
+setMethod("colMeans", signature(x = "diagonalMatrix"), .diag.cM)
+setMethod("rowSums",  signature(x = "diagonalMatrix"), .diag.rS)
+setMethod("rowMeans", signature(x = "diagonalMatrix"), .diag.rM)
 
-### Dense Matrices: -------------------------------------------------
-
-setMethod("colSums",  signature(x = "denseMatrix"), .as.d.Fun)
-setMethod("colMeans", signature(x = "denseMatrix"), .as.d.Fun)
-setMethod("rowSums",  signature(x = "denseMatrix"), .as.d.Fun)
-setMethod("rowMeans", signature(x = "denseMatrix"), .as.d.Fun)
-
-## FIXME: "works" but not optimally for triangular/symmetric(packed)/..
-setMethod("colSums",  signature(x = "ddenseMatrix"), .as.dge.Fun)
-setMethod("colMeans", signature(x = "ddenseMatrix"), .as.dge.Fun)
-setMethod("rowSums",  signature(x = "ddenseMatrix"), .as.dge.Fun)
-setMethod("rowMeans", signature(x = "ddenseMatrix"), .as.dge.Fun)
-
-setMethod("colSums", signature(x = "dgeMatrix"),
-	  function(x, na.rm = FALSE, dims = 1)
-          .Call(dgeMatrix_colsums, x, na.rm, TRUE, FALSE),
-	  valueClass = "numeric")
-
-setMethod("colMeans", signature(x = "dgeMatrix"),
-	  function(x, na.rm = FALSE, dims = 1)
-          .Call(dgeMatrix_colsums, x, na.rm, TRUE, TRUE),
-	  valueClass = "numeric")
-
-setMethod("rowSums", signature(x = "dgeMatrix"),
-	  function(x, na.rm = FALSE, dims = 1)
-          .Call(dgeMatrix_colsums, x, na.rm, FALSE, FALSE),
-	  valueClass = "numeric")
-
-setMethod("rowMeans", signature(x = "dgeMatrix"),
-	  function(x, na.rm = FALSE, dims = 1)
-          .Call(dgeMatrix_colsums, x, na.rm, FALSE, TRUE),
-	  valueClass = "numeric")
-
-### Sparse Matrices: -------------------------------------------------
-
-## Diagonal ones:
-.diag.Sum <- function(x, na.rm = FALSE, dims = 1)
-    if(x@diag == "U") rep(1, x@Dim[1]) else as.numeric(x@x)
-.diag.Mean <- function(x, na.rm = FALSE, dims = 1) {
-    n <- x@Dim[1L]
-    if(x@diag == "U") rep(1/n, n) else as.numeric(x@x)/n
-}
-
-setMethod("colSums",  signature(x = "diagonalMatrix"), .diag.Sum)
-setMethod("rowSums",  signature(x = "diagonalMatrix"), .diag.Sum)
-setMethod("colMeans", signature(x = "diagonalMatrix"), .diag.Mean)
-setMethod("rowMeans", signature(x = "diagonalMatrix"), .diag.Mean)
-
-rm(.diag.Sum, .diag.Mean)
-
-### Csparse --- the fast workhorse ones
-
-### 1) those with .Call(.), {d, i, l, n} gCMatrix  x  {col|row}{Sums|Means} :
-
-## the last two arguments to .gCMatrix_(col|col)(Sums|Means)  are 'trans' and 'means'
-setMethod("colSums", signature(x = "dgCMatrix"),
-	  function(x, na.rm = FALSE, dims = 1, sparseResult = FALSE)
-          .Call(dgCMatrix_colSums, x, na.rm, sparseResult, FALSE, FALSE))
-
-setMethod("rowSums", signature(x = "dgCMatrix"),
-	  function(x, na.rm = FALSE, dims = 1, sparseResult = FALSE)
-          .Call(dgCMatrix_colSums, x, na.rm, sparseResult, TRUE, FALSE))
-
-setMethod("colMeans", signature(x = "dgCMatrix"),
-	  function(x, na.rm = FALSE, dims = 1, sparseResult = FALSE)
-          .Call(dgCMatrix_colSums, x, na.rm, sparseResult, FALSE, TRUE))
-
-setMethod("rowMeans", signature(x = "dgCMatrix"),
-	  function(x, na.rm = FALSE, dims = 1, sparseResult = FALSE)
-          .Call(dgCMatrix_colSums, x, na.rm, sparseResult, TRUE, TRUE))
-
-setMethod("colSums", signature(x = "igCMatrix"),
-	  function(x, na.rm = FALSE, dims = 1, sparseResult = FALSE)
-          .Call(igCMatrix_colSums, x, na.rm, sparseResult, FALSE, FALSE))
-
-setMethod("rowSums", signature(x = "igCMatrix"),
-	  function(x, na.rm = FALSE, dims = 1, sparseResult = FALSE)
-          .Call(igCMatrix_colSums, x, na.rm, sparseResult, TRUE, FALSE))
-
-setMethod("colMeans", signature(x = "igCMatrix"),
-	  function(x, na.rm = FALSE, dims = 1, sparseResult = FALSE)
-          .Call(igCMatrix_colSums, x, na.rm, sparseResult, FALSE, TRUE))
-
-setMethod("rowMeans", signature(x = "igCMatrix"),
-	  function(x, na.rm = FALSE, dims = 1, sparseResult = FALSE)
-          .Call(igCMatrix_colSums, x, na.rm, sparseResult, TRUE, TRUE))
-
-setMethod("colSums", signature(x = "lgCMatrix"),
-	  function(x, na.rm = FALSE, dims = 1, sparseResult = FALSE)
-          .Call(lgCMatrix_colSums, x, na.rm, sparseResult, FALSE, FALSE))
-
-setMethod("rowSums", signature(x = "lgCMatrix"),
-	  function(x, na.rm = FALSE, dims = 1, sparseResult = FALSE)
-          .Call(lgCMatrix_colSums, x, na.rm, sparseResult, TRUE, FALSE))
-
-setMethod("colMeans", signature(x = "lgCMatrix"),
-	  function(x, na.rm = FALSE, dims = 1, sparseResult = FALSE)
-          .Call(lgCMatrix_colSums, x, na.rm, sparseResult, FALSE, TRUE))
-
-setMethod("rowMeans", signature(x = "lgCMatrix"),
-	  function(x, na.rm = FALSE, dims = 1, sparseResult = FALSE)
-          .Call(lgCMatrix_colSums, x, na.rm, sparseResult, TRUE, TRUE))
-
-setMethod("colSums", signature(x = "ngCMatrix"),
-	  function(x, na.rm = FALSE, dims = 1, sparseResult = FALSE)
-          .Call(ngCMatrix_colSums, x, na.rm, sparseResult, FALSE, FALSE))
-
-setMethod("rowSums", signature(x = "ngCMatrix"),
-	  function(x, na.rm = FALSE, dims = 1, sparseResult = FALSE)
-          .Call(ngCMatrix_colSums, x, na.rm, sparseResult, TRUE, FALSE))
-
-setMethod("colMeans", signature(x = "ngCMatrix"),
-	  function(x, na.rm = FALSE, dims = 1, sparseResult = FALSE)
-          .Call(ngCMatrix_colSums, x, na.rm, sparseResult, FALSE, TRUE))
-
-setMethod("rowMeans", signature(x = "ngCMatrix"),
-	  function(x, na.rm = FALSE, dims = 1, sparseResult = FALSE)
-          .Call(ngCMatrix_colSums, x, na.rm, sparseResult, TRUE, TRUE))
-
-### 2) the other Csparse ones are "just" coerced to a *gCMatrix :
-setMethod("colSums",  signature(x = "CsparseMatrix"), .as.gC.Fun)
-setMethod("colMeans", signature(x = "CsparseMatrix"), .as.gC.Fun)
-setMethod("rowSums",  signature(x = "CsparseMatrix"), .as.gC.Fun)
-setMethod("rowMeans", signature(x = "CsparseMatrix"), .as.gC.Fun)
-
-##setMethod("rowSums", signature(x = "dgCMatrix"),
-##	  function(x, na.rm = FALSE, dims = 1, sparseResult = FALSE)
-##	  sparsapply(x, 1, sum, sparseResult = sparseResult, na.rm = na.rm))
-
-##setMethod("rowMeans", signature(x = "dgCMatrix"), sp.rowMeans)
+rm(.diag.cS, .diag.cM, .diag.rS, .diag.rM)
 
 
-## --- Tsparse ----
-
-## .as.C.Fun -- since there's now  C code for dgCMatrix_colSums
-setMethod("colSums",  signature(x = "TsparseMatrix"), .as.C.Fun)
-setMethod("colMeans", signature(x = "TsparseMatrix"), .as.C.Fun)
-setMethod("rowSums",  signature(x = "TsparseMatrix"), .as.C.Fun)
-setMethod("rowMeans", signature(x = "TsparseMatrix"), .as.C.Fun)
-
-## setMethod("colSums", signature(x = "TsparseMatrix"), .as.dgT.Fun,
-## 	  valueClass = "numeric")
-## setMethod("colMeans", signature(x = "TsparseMatrix"), .as.dgT.Fun,
-## 	  valueClass = "numeric")
-##
-## setMethod("rowSums", signature(x = "TsparseMatrix"), .as.dgT.Fun,
-## 	  valueClass = "numeric")
-## setMethod("rowMeans", signature(x = "TsparseMatrix"), .as.dgT.Fun,
-## 	  valueClass = "numeric")
-
-
-## setMethod("colSums", signature(x = "dgTMatrix"),
-## 	  function(x, na.rm = FALSE, dims = 1, sparseResult = FALSE)
-## 	  sparsapply(x, 2, sum, sparseResult = sparseResult, na.rm = na.rm))
-
-## setMethod("rowSums", signature(x = "dgTMatrix"),
-## 	  function(x, na.rm = FALSE, dims = 1, sparseResult = FALSE)
-## 	  sparsapply(x, 1, sum, sparseResult = sparseResult, na.rm = na.rm))
-
-## setMethod("colMeans", signature(x = "dgTMatrix"), sp.colMeans)
-
-## setMethod("rowMeans", signature(x = "dgTMatrix"), sp.rowMeans)
-
-
-
-## --- Rsparse ----
-
-## row <-> col of the "transposed, seen as C" :
-setMethod("rowSums", signature(x = "RsparseMatrix"),
-          function(x, na.rm = FALSE, dims = 1, sparseResult = FALSE)
-          colSums(.tR.2.C(x),
-                  na.rm=na.rm, dims=dims, sparseResult=sparseResult))
-
-setMethod("rowMeans", signature(x = "RsparseMatrix"),
-          function(x, na.rm = FALSE, dims = 1, sparseResult = FALSE)
-          colMeans(.tR.2.C(x),
-                   na.rm=na.rm, dims=dims, sparseResult=sparseResult))
-setMethod("colSums", signature(x = "RsparseMatrix"),
-          function(x, na.rm = FALSE, dims = 1, sparseResult = FALSE)
-          rowSums(.tR.2.C(x),
-                  na.rm=na.rm, dims=dims, sparseResult=sparseResult))
-setMethod("colMeans", signature(x = "RsparseMatrix"),
-          function(x, na.rm = FALSE, dims = 1, sparseResult = FALSE)
-          rowMeans(.tR.2.C(x),
-                   na.rm=na.rm, dims=dims, sparseResult=sparseResult))
-
-## ## These two are obviously more efficient than going through Tsparse:
-## setMethod("colSums", signature(x = "dgRMatrix"),
-## 	  function(x, na.rm = FALSE, dims = 1, sparseResult = FALSE)
-## 	  sparsapply(x, 2, sum, sparseResult = sparseResult, na.rm = na.rm))
-
-## setMethod("colMeans", signature(x = "dgRMatrix"), sp.colMeans)
-
-## --- indMatrix [incl pMatrix ] ---
+## ---- indMatrix (incl. pMatrix) --------------------------------------
 
 setMethod("colSums",  signature(x = "indMatrix"),
-	  function(x, na.rm = FALSE, dims = 1)
-	  tabulate(x@perm, nbins=x@Dim[2]))
+          function(x, na.rm = FALSE, dims = 1L, ...) {
+              n <- x@Dim[2L]
+              r <- if(x@margin == 1L)
+                       tabulate(x@perm, n)
+                   else rep.int(1L, n)
+              if(!is.null(nms <- x@Dimnames[[2L]]))
+                  names(r) <- nms
+              r
+          })
 setMethod("colMeans",  signature(x = "indMatrix"),
-	  function(x, na.rm = FALSE, dims = 1)
-	  tabulate(x@perm, nbins=x@Dim[2])/x@Dim[1])
-## for completeness:
+          function(x, na.rm = FALSE, dims = 1L, ...) {
+              n <- (d <- x@Dim)[2L]
+              r <- if(x@margin == 1L)
+                       tabulate(x@perm, n) / d[1L]
+                   else rep.int(1 / d[1L], n)
+              if(!is.null(nms <- x@Dimnames[[2L]]))
+                  names(r) <- nms
+              r
+          })
 setMethod("rowSums",  signature(x = "indMatrix"),
-	  function(x, na.rm = FALSE, dims = 1) rep.int(1, x@Dim[1]))
+          function(x, na.rm = FALSE, dims = 1L, ...) {
+              m <- x@Dim[1L]
+              r <- if(x@margin == 1L)
+                       rep.int(1L, m)
+                   else tabulate(x@perm, m)
+              if(!is.null(nms <- x@Dimnames[[1L]]))
+                  names(r) <- nms
+              r
+          })
 setMethod("rowMeans",  signature(x = "indMatrix"),
-	  function(x, na.rm = FALSE, dims = 1) rep.int(1/x@Dim[2], x@Dim[1]))
-
-
-
+          function(x, na.rm = FALSE, dims = 1L, ...) {
+              m <- (d <- x@Dim)[1L]
+              r <- if(x@margin == 1L)
+                       rep.int(1 / d[2L], m)
+                   else tabulate(x@perm, m) / d[2L]
+              if(!is.null(nms <- x@Dimnames[[1L]]))
+                  names(r) <- nms
+              r
+          })

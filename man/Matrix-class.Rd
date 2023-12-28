@@ -1,104 +1,108 @@
 \name{Matrix-class}
-\title{Virtual Class "Matrix" Class of Matrices}
-\docType{class}
-\alias{Matrix-class}
-\alias{!,Matrix-method}
-%% Group methods:
-\alias{-,Matrix,missing-method}
-\alias{+,Matrix,missing-method}
-\alias{Arith,Matrix,Matrix-method}
-\alias{Ops,Matrix,Matrix-method}
-\alias{Ops,Matrix,ANY-method}
-\alias{Ops,ANY,Matrix-method}
-\alias{Ops,Matrix,NULL-method}
-\alias{Ops,NULL,Matrix-method}
-\alias{Ops,Matrix,matrix-method}
-\alias{Ops,matrix,Matrix-method}
-\alias{Ops,logical,Matrix-method}
-\alias{Ops,Matrix,logical-method}
-\alias{Logic,logical,Matrix-method}
-\alias{Logic,Matrix,logical-method}
-\alias{Logic,Matrix,ANY-method}
-\alias{Logic,ANY,Matrix-method}
-\alias{Summary,Matrix-method}
-\alias{Math2,Matrix-method}
-\alias{mean,Matrix-method}
-% "["             ---> Xtrct-methods.Rd
-% "[<-"           ---> Subassign-methods.Rd
-%\alias{solve,...} --> solve-methods.Rd
-%\alias{\%*%,... } --> matrix-products.Rd
-\alias{cbind2,ANY,Matrix-method}
-\alias{cbind2,Matrix,ANY-method}
-\alias{cbind2,Matrix,Matrix-method}
-\alias{cbind2,Matrix,NULL-method}
-\alias{cbind2,Matrix,atomicVector-method}
-\alias{cbind2,Matrix,missing-method}
-\alias{cbind2,NULL,Matrix-method}
-\alias{cbind2,atomicVector,Matrix-method}
-\alias{rbind2,ANY,Matrix-method}
-\alias{rbind2,Matrix,ANY-method}
-\alias{rbind2,Matrix,Matrix-method}
-\alias{rbind2,Matrix,NULL-method}
-\alias{rbind2,Matrix,atomicVector-method}
-\alias{rbind2,Matrix,missing-method}
-\alias{rbind2,NULL,Matrix-method}
-\alias{rbind2,atomicVector,Matrix-method}
+\title{Virtual Class "Matrix" of Matrices}
 %
-\alias{cov2cor,Matrix-method}
-\alias{det}% "the function" (our copy of base::det)
+\docType{class}
+\keyword{array}
+\keyword{classes}
+%
+\alias{Matrix-class}
+%
+\alias{!,Matrix-method}
+\alias{&,Matrix,ddiMatrix-method}
+\alias{&,Matrix,ldiMatrix-method}
+\alias{&,Matrix,ndiMatrix-method}
+\alias{*,Matrix,ddiMatrix-method}
+\alias{*,Matrix,ldiMatrix-method}
+\alias{*,Matrix,ndiMatrix-method}
+\alias{+,Matrix,missing-method}
+\alias{-,Matrix,missing-method}
+\alias{Arith,Matrix,Matrix-method}
+\alias{Arith,Matrix,lsparseMatrix-method}
+\alias{Arith,Matrix,nsparseMatrix-method}
+\alias{Logic,ANY,Matrix-method}
+\alias{Logic,Matrix,ANY-method}
+\alias{Logic,Matrix,nMatrix-method}
+\alias{Math2,Matrix-method}
+\alias{Ops,ANY,Matrix-method}
+\alias{Ops,Matrix,ANY-method}
+\alias{Ops,Matrix,NULL-method}
+\alias{Ops,Matrix,ddiMatrix-method}
+\alias{Ops,Matrix,ldiMatrix-method}
+\alias{Ops,Matrix,matrix-method}
+\alias{Ops,Matrix,sparseVector-method}
+\alias{Ops,NULL,Matrix-method}
+\alias{Ops,matrix,Matrix-method}
+\alias{^,Matrix,ddiMatrix-method}
+\alias{^,Matrix,ldiMatrix-method}
+\alias{^,Matrix,ndiMatrix-method}
+\alias{as.array,Matrix-method}
+\alias{as.complex,Matrix-method}
+\alias{as.integer,Matrix-method}
+\alias{as.logical,Matrix-method}
+\alias{as.matrix,Matrix-method}
+\alias{as.numeric,Matrix-method}
+\alias{as.vector,Matrix-method}
+\alias{coerce,ANY,Matrix-method}
+\alias{coerce,Matrix,CsparseMatrix-method}
+\alias{coerce,Matrix,RsparseMatrix-method}
+\alias{coerce,Matrix,TsparseMatrix-method}
+\alias{coerce,Matrix,corMatrix-method}
+\alias{coerce,Matrix,dMatrix-method}
+\alias{coerce,Matrix,ddenseMatrix-method}
+\alias{coerce,Matrix,denseMatrix-method}
+\alias{coerce,Matrix,diagonalMatrix-method}
+\alias{coerce,Matrix,dpoMatrix-method}
+\alias{coerce,Matrix,dppMatrix-method}
+\alias{coerce,Matrix,dsparseMatrix-method}
+\alias{coerce,Matrix,generalMatrix-method}
+\alias{coerce,Matrix,indMatrix-method}
+\alias{coerce,Matrix,lMatrix-method}
+\alias{coerce,Matrix,ldenseMatrix-method}
+\alias{coerce,Matrix,lsparseMatrix-method}
+\alias{coerce,Matrix,matrix-method}
+\alias{coerce,Matrix,nMatrix-method}
+\alias{coerce,Matrix,ndenseMatrix-method}
+\alias{coerce,Matrix,nsparseMatrix-method}
+\alias{coerce,Matrix,pMatrix-method}
+\alias{coerce,Matrix,packedMatrix-method}
+\alias{coerce,Matrix,pcorMatrix-method}
+\alias{coerce,Matrix,sparseMatrix-method}
+\alias{coerce,Matrix,sparseVector-method}
+\alias{coerce,Matrix,symmetricMatrix-method}
+\alias{coerce,Matrix,triangularMatrix-method}
+\alias{coerce,Matrix,unpackedMatrix-method}
+\alias{coerce,matrix,Matrix-method}
+\alias{coerce,vector,Matrix-method}
 \alias{determinant,Matrix,missing-method}
 \alias{determinant,Matrix,logical-method}
-\alias{diag,Matrix-method}
+\alias{dim,Matrix-method}
+\alias{dimnames,Matrix-method}
+\alias{dimnames<-,Matrix,NULL-method}
+\alias{dimnames<-,Matrix,list-method}
 \alias{drop,Matrix-method}
 \alias{head,Matrix-method}
-\alias{tail,Matrix-method}
-\alias{diff,Matrix-method}
-\alias{dim,Matrix-method}
-\alias{dim<-,Matrix-method}
-\alias{dimnames,Matrix-method}
-\alias{dimnames<-,Matrix,list-method}
-\alias{dimnames<-,Matrix,NULL-method}
+\alias{initialize,Matrix-method}
 \alias{length,Matrix-method}
-\alias{show,Matrix-method}
-\alias{as.array,Matrix-method}
-\alias{as.matrix,Matrix-method}
-\alias{as.vector,Matrix-method}
-\alias{as.numeric,Matrix-method}
-\alias{as.logical,Matrix-method}
-\alias{t,Matrix-method}
+\alias{tail,Matrix-method}
 \alias{unname,Matrix-method}
-\alias{coerce,Matrix,vector-method}
-\alias{coerce,Matrix,numeric-method}
-\alias{coerce,Matrix,logical-method}
-\alias{coerce,Matrix,integer-method}
-\alias{coerce,Matrix,complex-method}
+\alias{zapsmall,Matrix-method}
 %
-\alias{coerce,Matrix,matrix-method}%
-\alias{coerce,matrix,Matrix-method}
-\alias{coerce,ANY,Matrix-method}
-\alias{coerce,Matrix,denseMatrix-method}
-\alias{coerce,Matrix,CsparseMatrix-method}
-\alias{coerce,Matrix,sparseMatrix-method}
-%\alias{solve,Matrix,....-method}--> ./solve-methods.Rd
-\alias{rep,Matrix-method}
-\alias{svd,Matrix-method}% only if(.Matrix.avoiding.as.matrix)
-\alias{unname,Matrix,missing-method}
-% Fake entries - so users find this:
-\alias{print.Matrix}
+\alias{c.Matrix}
+%
+\alias{Matrix.Version} % FIXME: belongs in non-existent Matrix-package.Rd
+\alias{det}            % FIXME: ditto
 %
 \description{
   The \code{Matrix} class is a class contained by all actual
   classes in the \pkg{Matrix} package.  It is a \dQuote{virtual} class.
 }
 \section{Slots}{
-  Common to \emph{all} matrix objects in the package:
   \describe{
-    \item{\code{Dim}:}{Object of class \code{"integer"} - the dimensions
-     of the matrix - must be an integer vector with exactly two
-     non-negative values.}
-    \item{\code{Dimnames}:}{list of length two; each component
-      containing NULL or a \code{\link{character}} vector length
-      equal the corresponding \code{Dim} element.}
+    \item{\code{Dim}}{an integer vector of length 2 giving the
+      dimensions of the matrix.}
+    \item{\code{Dimnames}}{a list of length 2.  Each element must
+      be \code{NULL} or a character vector of length equal to the
+      corresponding element of \code{Dim}.}
   }
 }
 \section{Methods}{
@@ -144,7 +148,6 @@
       \code{as.vector(m)} should be identical to \code{as.vector(as(m,
 	"matrix"))}, implemented more efficiently for some subclasses.}
     \item{as(x, "vector"), as(x, "numeric")}{etc, similarly.}
-
     \item{coerce}{\code{signature(from = "ANY", to = "Matrix")}: This
       relies on a correct \code{\link{as.matrix}()} method for \code{from}.}
   }
@@ -158,7 +161,6 @@
   %% --> ../tests/base-matrix-fun.R
 }
 \note{
-  %% Matrix.avoding.as.matrix  is in __contradiction__ to this (since 2005-09-30 !):
   Loading the \code{Matrix} namespace \dQuote{overloads}
   \code{\link{as.matrix}} and \code{\link{as.array}} in the \pkg{base}
   namespace by the equivalent of \code{function(x) as(x, "matrix")}.
@@ -168,7 +170,6 @@
   E.g., \code{\link{apply}} or \code{\link{outer}} can therefore be applied
   to \code{"Matrix"} matrices.
 }
-%\references{}
 \author{Douglas Bates \email{bates@stat.wisc.edu} and Martin Maechler}
 \seealso{
   the classes \code{\linkS4class{dgeMatrix}},
@@ -198,5 +199,3 @@ stopifnot(identical(M, Matrix(c(0,1,0,0), 2,12)),
                     determinant(as(cm,"matrix"), log=FALSE)$modulus,
                     check.attributes=FALSE))
 }
-\keyword{classes}
-\keyword{algebra}

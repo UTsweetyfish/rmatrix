@@ -1,28 +1,27 @@
 \name{ndenseMatrix-class}
+\title{Virtual Class "ndenseMatrix" of Dense Logical Matrices}
+%
 \docType{class}
+\keyword{array}
+\keyword{classes}
+%
 \alias{ndenseMatrix-class}
+%
 \alias{!,ndenseMatrix-method}
+\alias{&,ndenseMatrix,ddiMatrix-method}
+\alias{&,ndenseMatrix,ldiMatrix-method}
+\alias{&,ndenseMatrix,ndiMatrix-method}
+\alias{*,ndenseMatrix,ddiMatrix-method}
+\alias{*,ndenseMatrix,ldiMatrix-method}
+\alias{*,ndenseMatrix,ndiMatrix-method}
 \alias{Ops,ndenseMatrix,ndenseMatrix-method}
-\alias{Summary,ndenseMatrix-method}
-\alias{as.logical,ndenseMatrix-method}
+\alias{^,ndenseMatrix,ddiMatrix-method}
+\alias{^,ndenseMatrix,ldiMatrix-method}
+\alias{^,ndenseMatrix,ndiMatrix-method}
 \alias{coerce,matrix,ndenseMatrix-method}
-\alias{coerce,ndenseMatrix,matrix-method}
-\alias{coerce,ndenseMatrix,CsparseMatrix-method}
-\alias{coerce,ndenseMatrix,TsparseMatrix-method}
-\alias{coerce,ndenseMatrix,ldenseMatrix-method}
-\alias{coerce,ndenseMatrix,sparseMatrix-method}
-\alias{coerce,ndenseMatrix,nsparseMatrix-method}
-\alias{coerce,ngeMatrix,lgeMatrix-method}
-\alias{coerce,nspMatrix,lspMatrix-method}
-\alias{coerce,nsyMatrix,lsyMatrix-method}
-\alias{coerce,ntpMatrix,ltpMatrix-method}
-\alias{coerce,ntrMatrix,ltrMatrix-method}
-\alias{as.vector,ndenseMatrix-method}
-\alias{diag,ndenseMatrix-method}
-\alias{norm,ndenseMatrix,character-method}
+\alias{coerce,vector,ndenseMatrix-method}
 \alias{which,ndenseMatrix-method}
 %
-\title{Virtual Class "ndenseMatrix" of Dense Logical Matrices}
 \description{
   \code{ndenseMatrix} is the virtual class of all dense \bold{l}ogical
   (S4) matrices.  It extends both \code{\linkS4class{denseMatrix}}
@@ -44,8 +43,6 @@ Class \code{"Matrix"}, by class \code{"denseMatrix"}.
   \describe{
     \item{\%*\%}{\code{signature(x = "nsparseMatrix", y = "ndenseMatrix")}: ... }
     \item{\%*\%}{\code{signature(x = "ndenseMatrix", y = "nsparseMatrix")}: ... }
-    \item{coerce}{\code{signature(from = "matrix", to = "ndenseMatrix")}: ... }
-    \item{coerce}{\code{signature(from = "ndenseMatrix", to = "matrix")}: ... }
     \item{crossprod}{\code{signature(x = "nsparseMatrix", y = "ndenseMatrix")}: ... }
     \item{crossprod}{\code{signature(x = "ndenseMatrix", y = "nsparseMatrix")}: ... }
     \item{as.vector}{\code{signature(x = "ndenseMatrix", mode = "missing")}: ...}
@@ -64,4 +61,3 @@ showClass("ndenseMatrix")
 
 as(diag(3) > 0, "ndenseMatrix")# -> "nge"
 }
-\keyword{classes}

@@ -1,46 +1,33 @@
-\name{[-methods}
-\docType{methods}
-\alias{[-methods}
+\name{Subscript-methods}
 \title{Methods for "[": Extraction or Subsetting in Package 'Matrix'}
-% NB: "[<-" are in ./Subassign-methods.Rd
-%                  ~~~~~~~~~~~~~~~~~~~~~~
-\alias{[,Matrix,missing,missing,ANY-method}
+%
+\docType{methods}
+\keyword{array}
+\keyword{methods}
+%
+\alias{[}
+\alias{[-methods}
+\alias{Subscript-methods}
+%
+\alias{[,Matrix,ANY,NULL,ANY-method}
+\alias{[,Matrix,NULL,ANY,ANY-method}
+\alias{[,Matrix,NULL,NULL,ANY-method}
+\alias{[,Matrix,index,index,logical-method}
+\alias{[,Matrix,index,index,missing-method}
+\alias{[,Matrix,index,missing,logical-method}
+\alias{[,Matrix,index,missing,missing-method}
+\alias{[,Matrix,lMatrix,missing,missing-method}
+\alias{[,Matrix,matrix,missing,missing-method}
+\alias{[,Matrix,missing,index,logical-method}
+\alias{[,Matrix,missing,index,missing-method}
 \alias{[,Matrix,missing,missing,logical-method}
 \alias{[,Matrix,missing,missing,missing-method}
-\alias{[,Matrix,missing,index,missing-method}
-\alias{[,Matrix,index,missing,missing-method}
-\alias{[,Matrix,index,index,missing-method}
-\alias{[,Matrix,lMatrix,missing,ANY-method}
-\alias{[,Matrix,logical,missing,ANY-method}
-\alias{[,Matrix,matrix,missing,ANY-method}
-\alias{[,Matrix,lMatrix,missing,missing-method}
-\alias{[,Matrix,logical,missing,missing-method}
-\alias{[,Matrix,matrix,missing,missing-method}
-\alias{[,Matrix,ANY,ANY,ANY-method}% bail out if no explicit method
+\alias{[,Matrix,nMatrix,missing,missing-method}
+\alias{[,abIndex,index,ANY,ANY-method}
+\alias{[,sparseVector,NULL,ANY,ANY-method}
+\alias{[,sparseVector,index,missing,missing-method}
+\alias{[,sparseVector,sparseVector,missing,missing-method}
 %
-\alias{[,denseMatrix,matrix,missing,ANY-method}
-\alias{[,denseMatrix,matrix,missing,missing-method}
-\alias{[,denseMatrix,index,missing,logical-method}
-\alias{[,denseMatrix,index,index,logical-method}
-\alias{[,denseMatrix,missing,index,logical-method}
-\alias{[,diagonalMatrix,index,missing,logical-method}
-\alias{[,diagonalMatrix,index,index,logical-method}
-\alias{[,diagonalMatrix,missing,index,logical-method}
-%
-\alias{[,CsparseMatrix,missing,index,logical-method}
-\alias{[,CsparseMatrix,index,missing,logical-method}
-\alias{[,CsparseMatrix,index,index,logical-method}
-% \alias{[,TsparseTMatrix,missing,missing,ANY-method}
-\alias{[,TsparseMatrix,index,missing,logical-method}
-\alias{[,TsparseMatrix,missing,index,logical-method}
-\alias{[,TsparseMatrix,index,index,logical-method}
-%
-\alias{[,sparseMatrix,missing,index,logical-method}
-\alias{[,sparseMatrix,index,missing,logical-method}
-\alias{[,sparseMatrix,index,index,logical-method}
-%
-\alias{[,indMatrix,index,missing,logical-method}
-%-------
 \description{
   Methods for \code{"["}, i.e., extraction or subsetting mostly of
   matrices, in package \pkg{Matrix}.
@@ -63,6 +50,10 @@
   \code{\link{Extract}} about the standard extraction.
 }
 \examples{
+\dontshow{ % for R_DEFAULT_PACKAGES=NULL
+library(stats, pos = "package:base", verbose = FALSE)
+library(utils, pos = "package:base", verbose = FALSE)
+}
 % regression tests are in ../tests/indexing.R
 str(m <- Matrix(round(rnorm(7*4),2), nrow = 7))
 stopifnot(identical(m, m[]))
@@ -75,5 +66,3 @@ m[,1:2]   # sub matrix of first two columns
 
 showMethods("[", inherited = FALSE)
 }
-\keyword{methods}
-\keyword{array}

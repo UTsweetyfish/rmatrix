@@ -1,12 +1,16 @@
 \name{Matrix}
-\alias{Matrix}
 \title{Construct a Classed Matrix}
+%
+\keyword{array}
+\keyword{utilities}
+%
+\alias{Matrix}
+\description{
+  Construct a Matrix of a class that inherits from \code{Matrix}.
+}
 \usage{
 Matrix(data=NA, nrow=1, ncol=1, byrow=FALSE, dimnames=NULL,
        sparse = NULL, doDiag = TRUE, forceCheck = FALSE)
-}
-\description{
-  Construct a Matrix of a class that inherits from \code{Matrix}.
 }
 \arguments{
   \item{data}{an optional numeric data vector or matrix.}
@@ -28,6 +32,8 @@ Matrix(data=NA, nrow=1, ncol=1, byrow=FALSE, dimnames=NULL,
 
     Otherwise, if \code{doDiag} is false, a dense or sparse (depending on
     \code{sparse}) \emph{symmetric} matrix will be returned.}
+% MJ: not quite ... if 'dimnames' is asymmetric then the result
+%     is a triangularMatrix, not a symmetricMatrix ...
 
   \item{forceCheck}{logical indicating if the checks for structure
     should even happen when \code{data} is already a \code{"Matrix"}
@@ -73,6 +79,9 @@ Matrix(data=NA, nrow=1, ncol=1, byrow=FALSE, dimnames=NULL,
   \code{\link{Diagonal}}.
 }
 \examples{
+\dontshow{ % for R_DEFAULT_PACKAGES=NULL
+library(utils, pos = "package:base", verbose = FALSE)
+}
 Matrix(0, 3, 2)             # 3 by 2 matrix of zeros -> sparse
 Matrix(0, 3, 2, sparse=FALSE)# -> 'dense'
 
@@ -108,5 +117,3 @@ stopifnot(is(As, "symmetricMatrix"),
           is(Matrix(0, 3,3), "sparseMatrix"),
           is(Matrix(FALSE, 1,1), "sparseMatrix"))
 }
-\keyword{array}
-\keyword{algebra}

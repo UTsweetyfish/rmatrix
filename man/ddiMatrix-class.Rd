@@ -1,8 +1,46 @@
 \name{ddiMatrix-class}
 \title{Class "ddiMatrix" of Diagonal Numeric Matrices}
+%
 \docType{class}
+\keyword{array}
+\keyword{classes}
+%
 \alias{ddiMatrix-class}
-%%----> put all methods into ./diagonalMatrix-class.Rd
+%
+\alias{\%\%,ddiMatrix,Matrix-method}
+\alias{\%\%,ddiMatrix,ddenseMatrix-method}
+\alias{\%\%,ddiMatrix,ldenseMatrix-method}
+\alias{\%\%,ddiMatrix,ndenseMatrix-method}
+\alias{\%/\%,ddiMatrix,Matrix-method}
+\alias{\%/\%,ddiMatrix,ddenseMatrix-method}
+\alias{\%/\%,ddiMatrix,ldenseMatrix-method}
+\alias{\%/\%,ddiMatrix,ndenseMatrix-method}
+\alias{&,ddiMatrix,Matrix-method}
+\alias{&,ddiMatrix,ddenseMatrix-method}
+\alias{&,ddiMatrix,ldenseMatrix-method}
+\alias{&,ddiMatrix,ndenseMatrix-method}
+\alias{*,ddiMatrix,Matrix-method}
+\alias{*,ddiMatrix,ddenseMatrix-method}
+\alias{*,ddiMatrix,ldenseMatrix-method}
+\alias{*,ddiMatrix,ndenseMatrix-method}
+\alias{/,ddiMatrix,Matrix-method}
+\alias{/,ddiMatrix,ddenseMatrix-method}
+\alias{/,ddiMatrix,ldenseMatrix-method}
+\alias{/,ddiMatrix,ndenseMatrix-method}
+\alias{Arith,ddiMatrix,logical-method}
+\alias{Arith,ddiMatrix,numeric-method}
+\alias{Arith,logical,ddiMatrix-method}
+\alias{Arith,numeric,ddiMatrix-method}
+\alias{Ops,ANY,ddiMatrix-method}
+\alias{Ops,ddiMatrix,ANY-method}
+\alias{Ops,ddiMatrix,Matrix-method}
+\alias{Ops,ddiMatrix,dMatrix-method}
+\alias{Ops,ddiMatrix,ddiMatrix-method}
+\alias{Ops,ddiMatrix,ldiMatrix-method}
+\alias{Ops,ddiMatrix,ndiMatrix-method}
+\alias{Ops,ddiMatrix,logical-method}
+\alias{Ops,ddiMatrix,numeric-method}
+\alias{Ops,ddiMatrix,sparseMatrix-method}
 %
 \description{The class \code{"ddiMatrix"} of numerical diagonal matrices.
   %% FIXME add more
@@ -41,6 +79,9 @@
   Class \code{\linkS4class{diagonalMatrix}} and function \code{\link{Diagonal}}.
 }
 \examples{
+\dontshow{ % for R_DEFAULT_PACKAGES=NULL
+library(utils, pos = "package:base", verbose = FALSE)
+}
 (d2 <- Diagonal(x = c(10,1)))
 str(d2)
 ## slightly larger in internal size:
@@ -53,4 +94,3 @@ chol(d2) # trivial
 stopifnot(is(cd2 <- chol(d2), "ddiMatrix"),
           all.equal(cd2@x, c(sqrt(10),1)))
 }
-\keyword{classes}

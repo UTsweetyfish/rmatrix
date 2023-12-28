@@ -1,13 +1,33 @@
-\name{cBind}
+\name{cbind2-methods}
 \title{'cbind()' and 'rbind()' recursively built on cbind2/rbind2}
-\alias{cBind}
-\alias{rBind}
-%no \alias{cbind2} or \alias{rbind2}
-% many more cbind2|rbind2 methods are in *-class.Rd, e.g. ./sparseMatrix-class.Rd
-\alias{cbind2,denseMatrix,sparseMatrix-method}
-\alias{cbind2,sparseMatrix,denseMatrix-method}
-\alias{rbind2,denseMatrix,sparseMatrix-method}
-\alias{rbind2,sparseMatrix,denseMatrix-method}
+%
+\docType{methods}
+\keyword{array}
+\keyword{manip}
+\keyword{methods}
+%
+\alias{cbind2}
+\alias{cbind2-methods}
+\alias{rbind2}
+\alias{rbind2-methods}
+%
+\alias{cbind2,Matrix,Matrix-method}
+\alias{cbind2,Matrix,NULL-method}
+\alias{cbind2,Matrix,matrix-method}
+\alias{cbind2,Matrix,missing-method}
+\alias{cbind2,Matrix,vector-method}
+\alias{cbind2,NULL,Matrix-method}
+\alias{cbind2,matrix,Matrix-method}
+\alias{cbind2,vector,Matrix-method}
+%
+\alias{rbind2,Matrix,Matrix-method}
+\alias{rbind2,Matrix,NULL-method}
+\alias{rbind2,Matrix,matrix-method}
+\alias{rbind2,Matrix,missing-method}
+\alias{rbind2,Matrix,vector-method}
+\alias{rbind2,NULL,Matrix-method}
+\alias{rbind2,matrix,Matrix-method}
+\alias{rbind2,vector,Matrix-method}
 %
 \description{
   The base functions \code{\link{cbind}} and \code{\link{rbind}} are
@@ -23,38 +43,21 @@
   binding together \emph{two} matrices, where in \pkg{Matrix}, we have
   defined methods for these and the \code{'Matrix'} matrices.
 }
-\section{Historical Remark}{
-  Before \R version 3.2.0 (April 2015), we have needed a substitute for
-  \emph{S4-enabled} versions of \code{cbind} and \code{rbind}, and
-  provided \code{cBind} and \code{rBind} with identical syntax and
-  semantic in order to bind together multiple matrices (\code{"matrix"}
-  or \code{"Matrix"} and vectors.
-  With \R version 3.2.0 and newer, \code{cBind} and \code{rBind} are
-  \emph{deprecated} and produce a deprecation warning (via
-  \code{\link{.Deprecated}}), and your code should start using
-  \code{cbind()} and \code{rbind()} instead.
-}
 \usage{
 ## cbind(..., deparse.level = 1)
 ## rbind(..., deparse.level = 1)
 
-## and e.g.,
-\S4method{cbind2}{denseMatrix,sparseMatrix}(x,y, sparse = NA, ...)
-\S4method{cbind2}{sparseMatrix,denseMatrix}(x,y, sparse = NA, ...)
-\S4method{rbind2}{denseMatrix,sparseMatrix}(x,y, sparse = NA, ...)
-\S4method{rbind2}{sparseMatrix,denseMatrix}(x,y, sparse = NA, ...)
+\S4method{cbind2}{Matrix,Matrix}(x, y, \dots)
+\S4method{rbind2}{Matrix,Matrix}(x, y, \dots)
 }
 \arguments{
-  \item{\dots, x, y}{matrix-like \R objects to be bound together, see
-    \code{\link{cbind}} and \code{\link{rbind}}.}
-  \item{sparse}{option \code{\link{logical}} indicating if the result
-    should be sparse, i.e., formally inheriting from \code{"\linkS4class{sparseMatrix}"}.
-    The default, \code{\link{NA}}, decides from the \dQuote{sparsity} of
-    \code{x} and \code{y}, see e.g., the \R code in
-    \code{selectMethod(cbind2, c("sparseMatrix","denseMatrix"))}.}
-  \item{deparse.level}{integer determining under which circumstances
-    column and row names are built from the actual arguments'
-    \sQuote{expression}, see \code{\link{cbind}}.}
+  \item{\dots}{for \code{[cr]bind}, vector- or matrix-like \R objects
+	to be bound together; for \code{[cr]bind2}, further arguments
+	passed to or from methods; see \code{\link{cbind}} and
+	\code{\link[methods]{cbind2}}.}
+  \item{deparse.level}{integer controlling the construction of labels
+	in the case of non-matrix-like arguments; see \code{\link{cbind}}.}
+  \item{x, y}{vector- or matrix-like \R objects to be bound together.}
 }
 \value{
   typically a \sQuote{matrix-like} object of a similar
@@ -68,8 +71,7 @@
   \code{\link{Matrix}()}).
 }
 \author{Martin Maechler}
-\seealso{\code{\link{cbind2}}, \code{\link{cbind}},
-  Documentation in base \R's \pkg{methods} package.
+\seealso{\code{\link{cbind}}, \code{\link[methods]{cbind2}}.
 
   Our class definition help pages mentioning \code{cbind2()} and
   \code{rbind2()} methods:
@@ -88,6 +90,3 @@ D <- Diagonal(2)
 stopifnot(validObject(M2), inherits(M2, "sparseMatrix"),
           dim(M2) == c(2,9))
 }
-\keyword{array}
-\keyword{manip}
-

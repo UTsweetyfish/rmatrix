@@ -1,8 +1,11 @@
 \name{replValue-class}
+\title{Virtual Class "replValue" - Simple Class for Subassignment Values}
+%
 \docType{class}
+\keyword{classes}
+%
 \alias{replValue-class}
-%% >>>>>>> The  "[<-" methods are in ./Subassign-methods.Rd
-\title{Virtual Class "replValue" - Simple Class for subassignment Values}
+%
 \description{The class \code{"replValue"} is a virtual class used for
   values in signatures for sub-assignment of \pkg{Matrix} matrices.
 
@@ -19,4 +22,3 @@
 \examples{
 showClass("replValue")
 }
-\keyword{classes}

@@ -1,272 +1,215 @@
-### Simple fallback methods for all dense matrices
-### These are "cheap" to program, but potentially far from efficient;
-### Methods for specific subclasses will overwrite these:
+## METHODS FOR CLASS: denseMatrix (virtual)
+## dense matrices with unpacked _or_ packed storage
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-setAs("ANY", "denseMatrix", function(from) Matrix(from, sparse=FALSE, doDiag=FALSE))
-## Conceivably, could write
-## setAs("matrix", "denseMatrix", ....) which was slightly more efficient than
-##  Matrix(.)  but would have many things in common
-
-setAs("denseMatrix", "generalMatrix", as_geSimpl)
-
-## dense to sparse:
-## : if we do this, do it "right", i.e. preserve symmetric/triangular!
-## setAs("denseMatrix", "dsparseMatrix",
-## ## MM thought that  as() will take the ``closest'' match; but that fails!
-## ##      function(from) as(as(from, "dgeMatrix"), "dsparseMatrix"))
-##       function(from) as(as(from, "dgeMatrix"), "dgCMatrix"))
-
-.dense2C <- function(from, kind = NA, uplo = "U", symDimnames = FALSE) {
-    useK <- is.character(kind) && length(kind) == 1 &&
-        kind %in% c("gen", "sym", "tri")
-    if(!useK) {
-        cl <- class(from)
-        cld <- getClassDef(cl) ## get it once (speedup)
+.dense.band <- function(x, k1, k2, ...)
+    .Call(R_dense_band, x, k1, k2)
+.dense.triu <- function(x, k = 0L, ...)
+    .Call(R_dense_band, x, k, NULL)
+.dense.tril <- function(x, k = 0L, ...)
+    .Call(R_dense_band, x, NULL, k)
+.dense.diag.get <- function(x, nrow, ncol, names = TRUE)
+    .Call(R_dense_diag_get, x, names)
+.dense.diag.set <- function(x, value)
+    .Call(R_dense_diag_set, x, value)
+.dense.t <- function(x)
+    .Call(R_dense_transpose, x)
+.dense.fS1  <- function(x, uplo)
+    .Call(R_dense_force_symmetric, x, NULL)
+.dense.fS2  <- function(x, uplo)
+    .Call(R_dense_force_symmetric, x, uplo)
+.dense.symmpart <- function(x)
+    .Call(R_dense_symmpart, x)
+.dense.skewpart <- function(x)
+    .Call(R_dense_skewpart, x)
+.dense.is.di <- function(object)
+    .Call(R_dense_is_diagonal, object)
+.dense.is.tr <- function(object, upper = NA, ...)
+    .Call(R_dense_is_triangular, object, upper)
+.dense.is.sy <- function(object, checkDN = TRUE, ...) {
+    if(checkDN) {
+        ca <- function(check.attributes = TRUE, ...) check.attributes
+        checkDN <- ca(...)
     }
-    r <- .Call(dense_to_Csparse, from)# goes via "generalMatrix"
-    ## FIXME: for symmetric / triangular matrices, this is a waste, notably if packed
-    if (useK && kind == "gen"  ||  !useK && extends(cld, "generalMatrix"))
-	r
-    else if(useK && kind == "sym" || !useK && extends(cld, "symmetricMatrix"))
-	forceCspSymmetric(r, uplo, isTri = FALSE, symDimnames=symDimnames)
-    else if(!useK && extends(cld, "diagonalMatrix"))
-	stop("diagonalMatrix in .dense2C() -- should never happen, please report!")
-    else { ## we have "triangular" :
-        if(useK) {
-            cl <- class(from)
-            cld <- getClassDef(cl) ## get it once (speedup)
-        }
-	if	(extends(cld,"dMatrix")) as(r, "dtCMatrix")
-        else if (extends(cld,"lMatrix")) as(r, "ltCMatrix")
-        else if (extends(cld,"nMatrix")) as(r, "ntCMatrix")
-        else if (extends(cld,"zMatrix")) as(r, "ztCMatrix")
-	else stop(gettextf("undefined method for class %s", dQuote(cl)), domain=NA)
+    .Call(R_dense_is_symmetric, object, checkDN)
+}
+.dense.is.sy.dz <- function(object, checkDN = TRUE,
+                            tol = 100 * .Machine$double.eps,
+                            tol1 = 8 * tol, ...) {
+    ## backwards compatibility: don't check DN if check.attributes=FALSE
+    if(checkDN) {
+        ca <- function(check.attributes = TRUE, ...) check.attributes
+        checkDN <- ca(...)
     }
+    ## be very fast when requiring exact symmetry
+    if(tol <= 0)
+        return(.Call(R_dense_is_symmetric, object, checkDN))
+    ## pretest: is it square?
+    d <- object@Dim
+    if((n <- d[2L]) != d[1L])
+        return(FALSE)
+    ## pretest: are DN symmetric in the sense of validObject(<symmetricMatrix>)?
+    if(checkDN && !isSymmetricDN(object@Dimnames))
+        return(FALSE)
+    if(n == 0L)
+        return(TRUE)
+    object <- .M2gen(object)
+
+    ## now handling n-by-n [dz]geMatrix, n >= 1:
+
+    Cj <- if(is.complex(object@x)) Conj else identity
+    ae <- function(check.attributes, ...) {
+        ## discarding possible user-supplied check.attributes
+        all.equal.numeric(..., check.attributes = FALSE)
+    }
+
+    ## pretest: outermost rows ~= outermost columns?
+    ## (fast for large asymmetric)
+    if(length(tol1)) {
+        i. <- if(n <= 4L) 1L:n else c(1L, 2L, n - 1L, n)
+        for(i in i.)
+            if(!isTRUE(ae(target = object[i, ], current = Cj(object[, i]),
+                          tolerance = tol1, ...)))
+                return(FALSE)
+    }
+    isTRUE(ae(target    =      object  @x,
+              current   = Cj(t(object))@x,
+              tolerance = tol, ...))
 }
 
-setAs("denseMatrix", "CsparseMatrix", function(from) .dense2C(from))
-
-## This sometimes fails (eg. for "lsyMatrix"), and we really want to
-## use the generic ``go via Csparse'' (top of ./sparseMatrix.R) instead
-## setAs("denseMatrix",  "sparseMatrix",
-##       function(from) {
-## 	  cl <- class(from)
-## 	  cld <- getClassDef(cl)
-## 	  if (extends(cld, "generalMatrix"))
-## 	      .Call(dense_to_Csparse, from)
-## 	  else ## i.e. triangular | symmetric
-## 	      as_Csparse(from, cld)
-##       })
-
-setAs("denseMatrix", "TsparseMatrix",
-      function(from) as(.dense2C(from), "TsparseMatrix"))
-
-
-setMethod("show", signature(object = "denseMatrix"),
-          function(object) prMatrix(object))
-##- ## FIXME: The following is only for the "dMatrix" objects that are not
-##- ##	      "dense" nor "sparse" -- i.e. "packed" ones :
-##- ## But these could be printed better -- "." for structural zeros.
-##- setMethod("show", signature(object = "dMatrix"), prMatrix)
-##- ## and improve this as well:
-##- setMethod("show", signature(object = "pMatrix"), prMatrix)
-##- ## this should now be superfluous [keep for safety for the moment]:
-
-setMethod("dim<-", signature(x = "denseMatrix", value = "ANY"),
-	  function(x, value) {
-	      if(!is.numeric(value) || length(value) != 2)
-		  stop("dim(.) value must be numeric of length 2")
-	      if(prod(dim(x)) != prod(value <- as.integer(value)))
-		  stop("dimensions don't match the number of cells")
-	      clx <- as.character(MatrixClass(class(x))) # as.*(): drop attr
-	      if(substring(clx,2) == "geMatrix") {
-		  x@Dim <- value
-		  if(length(x@factors) > 0)
-		      x@factors <- list()
-		  x
-	      } else { ## other "denseMatrix"
-		  x <- as_geSimpl2(x, clx)
-		  dim(x) <- value
-                  x
-	      }
+setMethod("diff", signature(x = "denseMatrix"),
+          ## Mostly cut and paste of base::diff.default :
+          function(x, lag = 1L, differences = 1L, ...) {
+              if(length(lag) != 1L || length(differences) != 1L ||
+                  lag < 1L || differences < 1L)
+                  stop(gettextf("'%s' and '%s' must be positive integers",
+                                "lag", "differences"),
+                       domain = NA)
+              if(lag * differences >= x@Dim[1L])
+                  return(x[0L])
+              i1 <- -seq_len(lag)
+              for(i in seq_len(differences)) {
+                  m <- x@Dim[1L]
+                  x <- x[i1, , drop = FALSE] -
+                      x[-m:-(m - lag + 1L), , drop = FALSE]
+              }
+              x
           })
 
+setMethod("mean", signature(x = "denseMatrix"),
+          function(x, ...) mean.default(.M2v(x), ...))
+
+setMethod("rep", signature(x = "denseMatrix"),
+          function(x, ...)          rep(.M2v(x), ...))
+
+setMethod("band"  , signature(x = "denseMatrix"), .dense.band)
+
+setMethod("triu"  , signature(x = "denseMatrix"), .dense.triu)
+
+setMethod("tril"  , signature(x = "denseMatrix"), .dense.tril)
+
+setMethod("diag"  , signature(x = "denseMatrix"), .dense.diag.get)
+
+setMethod("diag<-", signature(x = "denseMatrix"), .dense.diag.set)
+
+setMethod("t"     , signature(x = "denseMatrix"), .dense.t)
+
+setMethod("forceSymmetric", signature(x = "denseMatrix", uplo =   "missing"), .dense.fS1)
+
+setMethod("forceSymmetric", signature(x = "denseMatrix", uplo = "character"), .dense.fS2)
+
+setMethod("symmpart", signature(x = "denseMatrix"), .dense.symmpart)
+
+setMethod("skewpart", signature(x = "denseMatrix"), .dense.skewpart)
+
+setMethod("isSymmetric" , signature(object = "denseMatrix"), .dense.is.sy)
+
+setMethod("isTriangular", signature(object = "denseMatrix"), .dense.is.tr)
+
+setMethod("isDiagonal"  , signature(object = "denseMatrix"), .dense.is.di)
+
+.dense.subclasses <- names(getClassDef("denseMatrix")@subclasses)
+for (.cl in grep("^[dz](ge|tr|tp)Matrix$", .dense.subclasses, value = TRUE))
+setMethod("isSymmetric" , signature(object = .cl), .dense.is.sy.dz)
+rm(.cl, .dense.subclasses)
 
 
-## Using "index" for indices should allow
-## integer (numeric), logical, or character (names!) indices :
+## METHODS FOR CLASS: unpackedMatrix (virtual)
+## dense matrices with unpacked storage
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-## use geClass() when 'i' or 'j' are missing:
-## since  symmetric, triangular, .. will not be preserved anyway:
-setMethod("[", signature(x = "denseMatrix", i = "index", j = "missing",
-			 drop = "logical"),
-	  function (x, i, j, ..., drop) {
-	      if((na <- nargs()) == 3)
-		  r <- as(x, "matrix")[i, drop=drop]
-	      else if(na == 4)
-		  r <- as(x, "matrix")[i, , drop=drop]
-	      else stop(gettextf("invalid nargs()= %d", na), domain=NA)
-	      if(is.null(dim(r))) r else as(r, geClass(x))
-	  })
+setMethod("unpack", signature(x = "packedMatrix"),
+          function(x, ...) .Call(R_dense_as_unpacked, x))
 
-setMethod("[", signature(x = "denseMatrix", i = "missing", j = "index",
-			 drop = "logical"),
-	  function (x, i, j, ..., drop) {
-	      r <- as(x, "matrix")[, j, drop=drop]
-	      if(is.null(dim(r))) r else as(r, geClass(x))
-	  })
-
-setMethod("[", signature(x = "denseMatrix", i = "index", j = "index",
-			 drop = "logical"),
-	  function (x, i, j, ..., drop) {
-	      r <- callGeneric(x = as(x, "matrix"), i=i, j=j, drop=drop)
-	      if(is.null(dim(r)))
-		  r
-	      else {
-		  cld <- getClassDef(cl <- class(x))
-		  if(extends(cld, "symmetricMatrix") &&
-		     length(i) == length(j) && isTRUE(all(i == j)))
-                      ## keep original symmetric class (but not "dpo")
-                      as(r, class2(cl, .M.kindC(cld)))
-
-		  else as_smartClass(r, cl)
-	      }
-	  })
-
-.dense.sub.i.2col <- function(x, i, j, ..., drop) {
-    r <- as(x, "matrix")[ i ]
-    if(is.null(dim(r))) r else as(r, geClass(x))
-}
-setMethod("[", signature(x = "denseMatrix", i = "matrix", j = "missing"),#drop="ANY"
-	  .dense.sub.i.2col)
-setMethod("[", signature(x = "denseMatrix", i = "matrix", j = "missing", drop="missing"),
-	  .dense.sub.i.2col)
+setMethod("pack", signature(x = "packedMatrix"),
+          function(x, ...) x)
 
 
-## Now the "[<-" ones --- see also those in ./Matrix.R
-## It's recommended to use setReplaceMethod() rather than setMethod("[<-",.)
-## even though the former is currently just a wrapper for the latter
+## METHODS FOR CLASS: packedMatrix (virtual)
+## dense matrices with packed storage
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-## x[] <- value :
-setReplaceMethod("[", signature(x = "denseMatrix", i = "missing", j = "missing",
-				value = "ANY"),## double/logical/...
-	  function (x, value) {
-	      x <- as(x, "generalMatrix")
-	      x@x[] <- value
-	      validObject(x)# check if type and lengths above match
-	      x
-	  })
+.uM.pack <-
+function(x, ...) .Call(R_dense_as_packed, x, NULL, NULL)
 
-## FIXME: 1) These are far from efficient
-## -----
-setReplaceMethod("[", signature(x = "denseMatrix", i = "index", j = "missing",
-				value = "replValue"),
-		 function (x, i, j, ..., value) {
-		     r <- as(x, "matrix")
-## 		     message("`[<-` with nargs()= ",nargs())
-		     if((na <- nargs()) == 3)
-			 r[i] <- value
-		     else if(na == 4)
-			 r[i, ] <- value
-		     else stop(gettextf("invalid nargs()= %d", na), domain=NA)
-		     as(r, geClass(x))
-		 })
-
-setReplaceMethod("[", signature(x = "denseMatrix", i = "missing", j = "index",
-				value = "replValue"),
-		 function (x, i, j, ..., value) {
-		     r <- as(x, "matrix")
-		     r[, j] <- value
-		     as(r, geClass(x))
-		 })
-
-setReplaceMethod("[", signature(x = "denseMatrix", i = "index", j = "index",
-				value = "replValue"),
-		 function (x, i, j, ..., value) {
-		     r <- as(x, "matrix")
-		     r[i, j] <- value
-		     as_smartClass(r, class(x)) ## was as(r, class(x))
-		 })
-
-setReplaceMethod("[", signature(x = "denseMatrix", i = "matrix",  # 2-col.matrix
-				j = "missing", value = "replValue"),
-		 function(x, i, j, ..., value) {
-		     r <- as(x, "matrix")
-		     r[ i ] <- value
-		     as(r, geClass(x))
-		 })
-
-
-setMethod("isSymmetric", signature(object = "denseMatrix"),
-	  function(object, tol = 100*.Machine$double.eps, tol1 = 8*tol, ...) {
-	      ## pretest: is it square?
-	      d <- dim(object)
-              if((n <- d[1L]) != d[2L]) return(FALSE)
-	      if(n <= 1L) return(TRUE)
-	      ## else: square (n x n) matrix, n >= 2 :
-              is.z <- is(object, "zMatrix")
-	      ## initial tests, fast for large non-symmetric:
-	      if(length(tol1)) {
-		  ## initial pre-tests, fast for large non-symmetric:
-		  Cj <- if(is.z) Conj else identity
-		  for(i in unique(c(1L, 2L, n-1L, n)))
-		      if(is.character(all.equal(object[i, ], Cj(object[, i]),
-						tolerance = tol1, ...))) return(FALSE)
-	      }
-	      ## else slower test
-	      if (is(object,"dMatrix"))
-		  isTRUE(all.equal(as(  object,  "dgeMatrix"),
-				   as(t(object), "dgeMatrix"), tolerance = tol, ...))
-	      else if (is(object, "nMatrix"))
-		  identical(as(  object,  "ngeMatrix"),
-			    as(t(object), "ngeMatrix"))
-	      else if (is(object, "lMatrix"))# not possible currently
-		  ## test for exact equality; FIXME(?): identical() too strict?
-		  identical(as(  object,  "lgeMatrix"),
-			    as(t(object), "lgeMatrix"))
-	      else if (is.z) ## will error out here
-		  isTRUE(all.equal(as(       object,   "zgeMatrix"),
-				   as(Conj(t(object)), "zgeMatrix"),
-				   tolerance = tol, ...))
-	      else if (is(object, "iMatrix")) ## will error out here
-		  identical(as(object, "igeMatrix"),
-			    as(t(object), "igeMatrix"))
-	  })
-
-## rather methods in ./triangularMatrix.R
-## setMethod("isTriangular", signature(object = "triangularMatrix"),
-## 	  function(object, ...) TRUE)
-
-setMethod("isTriangular", signature(object = "denseMatrix"), isTriMat)
-
-setMethod("isDiagonal", signature(object = "denseMatrix"), .is.diagonal)
-
-setMethod("rcond", signature(x = "denseMatrix", norm = "character"),
-	  function(x, norm, ...)
-	  rcond(as(as(x, "dMatrix"), "dgeMatrix"), norm=norm, ...))
-
-setMethod("symmpart", signature(x = "denseMatrix"),
-	  function(x) symmpart(as(x, "dMatrix")))
-setMethod("skewpart", signature(x = "denseMatrix"),
-	  function(x) skewpart(as(x, "dMatrix")))
-
-setMethod("is.na", signature(x = "denseMatrix"),
-	  function(x) {
-	      if(any((inax <- is.na(x@x)))) {
-		  r <- as(x, "lMatrix")#-> logical x-slot
-		  r@x <- inax
-		  as(r, "nMatrix")
-	      } else {
-		  d <- x@Dim
-		  new("ngCMatrix", Dim = d, Dimnames = dimnames(x),
-		      i = integer(0), p = rep.int(0L, d[2]+1L))
-	      }
-	  })
-
-if(.Matrix.avoiding.as.matrix) {
-setMethod("qr", signature(x = "ddenseMatrix"),
-	  function(x, ...) qr.default(ge2mat(..2dge(x)), ...))
-setMethod("qr", signature(x = "denseMatrix"),
-	  function(x, ...) qr(as(x, "ddenseMatrix"), ...))
+.uM.pack.ge <-
+function(x, symmetric = NA, upperTri = NA, ...) {
+    if(((sna <- is.na(symmetric)) || symmetric) && isSymmetric(x, ...))
+        .Call(R_dense_as_packed, x, "U", NULL)
+    else if((sna || !symmetric) &&
+            (it <- isTriangular(x, upper = upperTri))) {
+        uplo <-
+            if(is.na(upperTri))
+                attr(it, "kind")
+            else if(upperTri)
+                "U"
+            else "L"
+        .Call(R_dense_as_packed, x, uplo, "N")
+    } else {
+        if(sna)
+            stop("matrix is not symmetric or triangular")
+        else if(symmetric)
+            stop("matrix is not symmetric")
+        else stop("matrix is not triangular")
+    }
 }
 
+setMethod("unpack", signature(x = "unpackedMatrix"),
+          function(x, ...) x)
+
+setMethod("pack", signature(x = "unpackedMatrix"), .uM.pack)
+
+.uM.subclasses <- names(getClassDef("unpackedMatrix")@subclasses)
+for(.cl in grep("^.geMatrix$", .uM.subclasses, value = TRUE))
+setMethod("pack", signature(x = .cl), .uM.pack.ge)
+rm(.cl, .uM.subclasses)
+
+
+## METHODS FOR CLASS: matrix
+## traditional matrices, which really are "dense"
+## ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.m.pack <- .uM.pack.ge
+body(.m.pack)[[2L]][[3L]]             <-  quote(.m2dense(x, ".sp",  "U"))
+body(.m.pack)[[2L]][[4L]][[3L]][[3L]] <-  quote(.m2dense(x, ".tp", uplo))
+
+setMethod("unpack", signature(x = "matrix"),
+          function(x, ...) .m2dense.checking(x, "."))
+setMethod("pack", signature(x = "matrix"), .m.pack)
+setMethod("band", signature(x = "matrix"), .dense.band)
+setMethod("triu", signature(x = "matrix"), .dense.triu)
+setMethod("tril", signature(x = "matrix"), .dense.tril)
+setMethod("forceSymmetric", signature(x = "matrix", uplo = "missing"),
+          function(x, uplo) .m2dense(x, ".sy",  "U"))
+setMethod("forceSymmetric", signature(x = "matrix", uplo = "character"),
+          function(x, uplo) .m2dense(x, ".sy", uplo))
+setMethod("symmpart", signature(x = "matrix"),
+          function(x) symmetrizeDN(0.5 * (x + t(x))))
+setMethod("skewpart", signature(x = "matrix"),
+          function(x) symmetrizeDN(0.5 * (x - t(x))))
+setMethod("isTriangular", signature(object = "matrix"), .dense.is.tr)
+setMethod("isDiagonal"  , signature(object = "matrix"), .dense.is.di)
+
+rm(.uM.pack, .uM.pack.ge, .m.pack,
+   list = c(grep("^[.]dense[.](band|tri[ul]|diag[.](get|set)|t|fS[12]|symmpart|skewpart|is[.](sy|tr|di)([.]dz)?)$",
+                 ls(all.names = TRUE), value = TRUE)))

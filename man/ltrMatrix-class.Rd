@@ -1,26 +1,13 @@
 \name{ltrMatrix-class}
-\docType{class}
-\alias{ltpMatrix-class}
-\alias{ltrMatrix-class}
-%
-\alias{!,ltpMatrix-method}
-\alias{!,ltrMatrix-method}
-\alias{coerce,ltpMatrix,dtpMatrix-method}
-\alias{coerce,ltpMatrix,lgeMatrix-method}
-\alias{coerce,ltpMatrix,ltrMatrix-method}
-\alias{coerce,ltrMatrix,dtrMatrix-method}
-\alias{coerce,ltrMatrix,lgeMatrix-method}
-\alias{coerce,ltrMatrix,ltpMatrix-method}
-\alias{coerce,matrix,ltrMatrix-method}
-\alias{coerce,matrix,ltpMatrix-method}
-\alias{diag,ltrMatrix-method}
-\alias{diag,ltpMatrix-method}
-\alias{diag<-,ltpMatrix-method}
-\alias{diag<-,ltrMatrix-method}
-\alias{t,ltpMatrix-method}
-\alias{t,ltrMatrix-method}
-%
 \title{Triangular Dense Logical Matrices}
+%
+\docType{class}
+\keyword{array}
+\keyword{classes}
+%
+\alias{ltrMatrix-class}
+\alias{ltpMatrix-class}
+%
 \description{
   The \code{"ltrMatrix"} class is the class of triangular, dense,
   logical matrices in nonpacked storage.  The \code{"ltpMatrix"} class
@@ -52,20 +39,22 @@
 \section{Methods}{
   Currently, mainly \code{\link{t}()} and coercion methods (for
   \code{\link{as}(.)}; use, e.g.,
-  \code{\link{showMethods}(class="ltpMatrix")} for details.
+  \code{\link{showMethods}(class="ltrMatrix")} for details.
 }
 \seealso{
   Classes \code{\linkS4class{lgeMatrix}}, \code{\linkS4class{Matrix}};
   function \code{\link[base]{t}}
 }
 \examples{
+\dontshow{ % for R_DEFAULT_PACKAGES=NULL
+library(utils, pos = "package:base", verbose = FALSE)
+}
 showClass("ltrMatrix")
 
 str(new("ltpMatrix"))
-(lutr <- as(upper.tri(matrix(,4,4)), "ltrMatrix"))
-str(lutp <- as(lutr, "ltpMatrix"))# packed matrix: only 10 = (4+1)*4/2 entries
-!lutp ## the logical negation (is *not* logical triangular !)
+(lutr <- as(upper.tri(matrix(, 4, 4)), "ldenseMatrix"))
+str(lutp <- pack(lutr)) # packed matrix: only 10 = 4*(4+1)/2 entries
+!lutp # the logical negation (is *not* logical triangular !)
 ## but this one is:
-stopifnot(all.equal(lutp, as(!!lutp, "ltpMatrix")))
+stopifnot(all.equal(lutp, pack(!!lutp)))
 }
-\keyword{classes}

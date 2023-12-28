@@ -1,12 +1,21 @@
-\name{norm}
+\name{norm-methods}
 \title{Matrix Norms}
+%
+\docType{methods}
+\keyword{algebra}
+\keyword{math}
+\keyword{methods}
+%
 \alias{norm}
+\alias{norm-methods}
+%
 \alias{norm,ANY,missing-method}
-\alias{norm,matrix,character-method}
-\alias{norm,Matrix,character-method}
-\usage{
-norm(x, type, \dots)
-}
+\alias{norm,denseMatrix,character-method}
+\alias{norm,diagonalMatrix,character-method}
+\alias{norm,indMatrix,character-method}
+\alias{norm,pMatrix,character-method}
+\alias{norm,sparseMatrix,character-method}
+%
 \description{
   Computes a matrix norm of \code{x}, using Lapack for dense matrices.
   The norm can be the one  (\code{"O"}, or \code{"1"}) norm, the
@@ -14,6 +23,9 @@ norm(x, type, \dots)
   the maximum modulus (\code{"M"}) among elements of a matrix, or the
   spectral norm or 2-norm (\code{"2"}), as determined by the value of
   \code{type}.
+}
+\usage{
+norm(x, type, \dots)
 }
 \arguments{
   \item{x}{
@@ -30,7 +42,7 @@ norm(x, type, \dots)
 	Euclidean norm of \code{x} treated as if it were a vector);}
       \item{\code{"M"} or \code{"m"}}{specifies the maximum modulus of
 	all the elements in \code{x}; and}
-      \item{\code{"2"}}{specifies the \dQuote{spectral norm} or {2-norm}, which
+      \item{\code{"2"}}{specifies the \dQuote{spectral norm} aka \dQuote{2-norm}, which
 	is the largest singular value (\code{\link{svd}}) of \code{x}.}
     }
     The default is \code{"O"}.  Only the first character of
@@ -64,8 +76,11 @@ norm(x)# = "O" = "1"
 stopifnot(identical(norm(x), norm(x, "1")))
 norm(x, "I")# the same, because 'x' is symmetric
 
-allnorms <- function(d) vapply(c("1","I","F","M","2"),
-                               norm, x = d, double(1))
+allnorms <- function(x) {
+    ## norm(NA, "2") did not work until R 4.0.0
+    do2 <- getRversion() >= "4.0.0" || !anyNA(x)
+    vapply(c("1", "I", "F", "M", if(do2) "2"), norm, 0, x = x)
+}
 allnorms(x)
 allnorms(Hilbert(10))
 
@@ -81,4 +96,3 @@ stopifnot(all.equal(nA, allnorms(as(A, "matrix"))),
 A. <- A; A.[1,3] <- NA
 stopifnot(is.na(allnorms(A.))) # gave error
 }
-\keyword{algebra}

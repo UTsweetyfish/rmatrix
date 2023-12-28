@@ -1,49 +1,28 @@
 \name{dsyMatrix-class}
-\title{Symmetric Dense (Packed | Non-packed) Numeric Matrices}
+\title{Symmetric Dense (Packed or Unpacked) Numeric Matrices}
+%
 \docType{class}
-\alias{dspMatrix-class}
+\keyword{array}
+\keyword{classes}
+%
 \alias{dsyMatrix-class}
+\alias{dspMatrix-class}
 %
-% \alias{solve, ..} --> solve-methods.Rd
-% \alias{\%*%,  ..} --> matrix-products.Rd
-\alias{coerce,dspMatrix,dsyMatrix-method}
-\alias{coerce,dspMatrix,lspMatrix-method}
-\alias{coerce,dspMatrix,matrix-method}
-\alias{coerce,dspMatrix,CsparseMatrix-method}
-\alias{coerce,dspMatrix,sparseMatrix-method}
-\alias{coerce,dgeMatrix,dspMatrix-method}
-\alias{coerce,matrix,dspMatrix-method}
-\alias{coerce,dgeMatrix,dsyMatrix-method}% or rather setIs?
 \alias{coerce,dsyMatrix,corMatrix-method}
-\alias{coerce,dsyMatrix,dpoMatrix-method}% instead of setIs
-\alias{coerce,dsyMatrix,dspMatrix-method}
-\alias{coerce,dsyMatrix,lsyMatrix-method}
-\alias{.dsy2mat}% hidden but exported
-\alias{coerce,dsyMatrix,matrix-method}
-\alias{coerce,matrix,dsyMatrix-method}
-\alias{diag,dspMatrix-method}
-\alias{diag,dsyMatrix-method}
-\alias{diag<-,dspMatrix-method}
-\alias{diag<-,dsyMatrix-method}
+\alias{coerce,dsyMatrix,dpoMatrix-method}
+\alias{determinant,dsyMatrix,logical-method}
 %
-\alias{show,dsyMatrix-method}
-\alias{norm,dspMatrix,character-method}
-\alias{norm,dspMatrix,missing-method}
-\alias{norm,dsyMatrix,character-method}
-\alias{norm,dsyMatrix,missing-method}
-\alias{rcond,dspMatrix,character-method}
-\alias{rcond,dspMatrix,missing-method}
-\alias{rcond,dsyMatrix,character-method}
-\alias{rcond,dsyMatrix,missing-method}
-\alias{t,dspMatrix-method}
-\alias{t,dsyMatrix-method}
+\alias{coerce,dspMatrix,dppMatrix-method}
+\alias{coerce,dspMatrix,pcorMatrix-method}
+\alias{determinant,dspMatrix,logical-method}
+%
 \description{
   \itemize{
-    \item{The \code{"dsyMatrix"} class is the class of symmetric, dense matrices
-      in \emph{non-packed} storage and}
-    \item{\code{"dspMatrix"} is the class of symmetric dense matrices in
-      \emph{packed} storage.  Only the upper triangle or the lower
-      triangle is stored.}
+    \item The \code{"dsyMatrix"} class is the class of symmetric, dense matrices
+      in \emph{non-packed} storage and
+    \item \code{"dspMatrix"} is the class of symmetric dense matrices in
+      \emph{packed} storage, see \code{\link{pack}()}.  Only the upper
+      triangle or the lower triangle is stored.
   }
 }
 \section{Objects from the Class}{
@@ -73,12 +52,6 @@
 }
 \section{Methods}{
   \describe{
-    \item{coerce}{\code{signature(from = "ddenseMatrix", to = "dgeMatrix")}}
-    %
-    \item{coerce}{\code{signature(from = "dspMatrix", to = "matrix")}}
-    \item{coerce}{\code{signature(from = "dsyMatrix", to = "matrix")}}
-    \item{coerce}{\code{signature(from = "dsyMatrix", to = "dspMatrix")}}
-    \item{coerce}{\code{signature(from = "dspMatrix", to = "dsyMatrix")}}
     \item{norm}{\code{signature(x = "dspMatrix", type = "character")}, or
       \code{x = "dsyMatrix"} or \code{type = "missing"}: Computes the
       matrix norm of the desired type, see, \code{\link{norm}}.}
@@ -106,6 +79,9 @@
   \code{\link[base]{t}}
 }
 \examples{
+\dontshow{ % for R_DEFAULT_PACKAGES=NULL
+library(utils, pos = "package:base", verbose = FALSE)
+}
 ## Only upper triangular part matters (when uplo == "U" as per default)
 (sy2 <- new("dsyMatrix", Dim = as.integer(c(2,2)), x = c(14, NA,32,77)))
 str(t(sy2)) # uplo = "L", and the lower tri. (i.e. NA is replaced).
@@ -122,5 +98,13 @@ stopifnot(1 == grep("not a positive definite matrix",
                     as.character(tr)),
 	  is(sp2, "dspMatrix"))
 }
+
+## 4x4 example
+m <- matrix(0,4,4); m[upper.tri(m)] <- 1:6
+(sym <- m+t(m)+diag(11:14, 4))
+(S1 <- pack(sym))
+(S2 <- t(S1))
+stopifnot(all(S1 == S2)) # equal "seen as matrix", but differ internally :
+str(S1)
+S2@x
 }
-\keyword{classes}

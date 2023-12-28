@@ -1,9 +1,11 @@
 \name{index-class}
-\docType{class}
-\alias{index-class}
-%% The "[" and "[<-" methods are
-%% in ./Xtrct-methods.Rd and ./Subassign-methods.Rd
 \title{Virtual Class "index" - Simple Class for Matrix Indices}
+%
+\docType{class}
+\keyword{classes}
+%
+\alias{index-class}
+%
 \description{The class \code{"index"} is a virtual class used for
   indices (in signatures) for matrix indexing and sub-assignment of
   \pkg{Matrix} matrices.
@@ -22,4 +24,3 @@
 \examples{
 showClass("index")
 }
-\keyword{classes}

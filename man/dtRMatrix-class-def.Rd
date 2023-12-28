@@ -1,8 +1,12 @@
 \name{dtRMatrix-class}
 \title{Triangular Sparse Compressed Row Matrices}
+%
 \docType{class}
+\keyword{array}
+\keyword{classes}
+%
 \alias{dtRMatrix-class}
-%%--- No methods currently --- see ./dtCMatrix-class.Rd for more
+%
 \description{The \code{dtRMatrix} class is a class of triangular, sparse
   matrices in the compressed, row-oriented format.  In this
   implementation the non-zero elements in the rows are sorted into
@@ -60,11 +64,12 @@ Class \code{"Matrix"}, by class \code{"dgRMatrix"}.
   \code{\linkS4class{dgeMatrix}}
 }
 \examples{
+\dontshow{ % for R_DEFAULT_PACKAGES=NULL
+library(utils, pos = "package:base", verbose = FALSE)
+}
 (m0 <- new("dtRMatrix"))
 (m2 <- new("dtRMatrix", Dim = c(2L,2L),
                         x = c(5, 1:2), p = c(0L,2:3), j= c(0:1,1L)))
 str(m2)
 (m3 <- as(Diagonal(2), "RsparseMatrix"))# --> dtRMatrix
 }
-\keyword{classes}
-\keyword{algebra}

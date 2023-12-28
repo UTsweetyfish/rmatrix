@@ -1,7 +1,12 @@
 \name{rankMatrix}
 \title{Rank of a Matrix}
+%
+\keyword{algebra}
+\keyword{utilities}
+%
 \alias{rankMatrix}
 \alias{qr2rankMatrix}
+%
 \description{
   Compute \sQuote{the} matrix rank, a well-defined functional in theory(*),
   somewhat ambiguous in practice.  We provide several methods, the
@@ -85,9 +90,8 @@ qr2rankMatrix(qr, tol = NULL, isBqr = is.qr(qr), do.warn = TRUE)
   \item{isBqr}{\code{\link{logical}} indicating if \code{qr} is resulting
     from \pkg{base} \code{\link[base]{qr}()}.  (Otherwise, it is typically
     from \pkg{Matrix} package sparse \code{\link[Matrix]{qr}}.)}
-  \item{do.warn}{logical; if true, warn about non-finite (or in the
-    \code{sparseQR} case negative)
-    diagonal entries in the \eqn{R} matrix of the \eqn{QR} decomposition.
+  \item{do.warn}{logical; if true, warn about non-finite diagonal
+    entries in the \eqn{R} matrix of the \eqn{QR} decomposition.
     Do not change lightly!}
 }
 \details{
@@ -129,6 +133,9 @@ qr2rankMatrix(qr, tol = NULL, isBqr = is.qr(qr), do.warn = TRUE)
  \code{\link{qr}}, \code{\link{svd}}.
 }
 \examples{
+\dontshow{ % for R_DEFAULT_PACKAGES=NULL
+library(stats, pos = "package:base", verbose = FALSE)
+}
 rankMatrix(cbind(1, 0, 1:3)) # 2
 
 (meths <- eval(formals(rankMatrix)$method))
@@ -169,14 +176,15 @@ sapply(meths, function(.m.) rankMatrix(M15, method = .m., tol = 1e-7)) # all 14
 ## "large" sparse
 n <- 250000; p <- 33; nnz <- 10000
 L <- sparseMatrix(i = sample.int(n, nnz, replace=TRUE),
-                  j = sample.int(p, nnz, replace=TRUE), x = rnorm(nnz))
+                  j = sample.int(p, nnz, replace=TRUE),
+                  x = rnorm(nnz))
 (st1 <- system.time(r1 <- rankMatrix(L)))                # warning+ ~1.5 sec (2013)
 (st2 <- system.time(r2 <- rankMatrix(L, method = "qr"))) # considerably faster!
 r1[[1]] == print(r2[[1]]) ## -->  ( 33  TRUE )
-\dontshow{ stopifnot(r1[[1]] == 33, 33 == r2[[1]])
- if(doExtras <- interactive() ||
-	identical("true", unname(Sys.getenv("R_PKG_CHECKING_doExtras"))))
-  stopifnot(st2[[1]] < 0.2) # seeing 0.03 (on ~ 2010-hardware; R 3.0.2)
+\dontshow{
+stopifnot(r1[[1]] == 33, 33 == r2[[1]])
+if(interactive() || nzchar(Sys.getenv("R_MATRIX_CHECK_EXTRA")))
+    stopifnot(st2[[1]] < 0.2) # seeing 0.03 (on ~ 2010-hardware; R 3.0.2)
 }
 ## another sparse-"qr" one, which ``failed'' till 2013-11-23:
 set.seed(42)
@@ -192,5 +200,3 @@ stopifnot(rankMatrix(D,           method='qr') == 148,
 stopifnot(sapply(meths, function(.m.)
                         rankMatrix(matrix(0, 2, 2), method = .m.)) == 0)
 }
-\keyword{algebra}
-\keyword{array}

@@ -1,7 +1,11 @@
 \name{number-class}
-\docType{class}
-\alias{number-class}
 \title{Class "number" of Possibly Complex Numbers}
+%
+\docType{class}
+\keyword{classes}
+%
+\alias{number-class}
+%
 \description{The class \code{"number"} is a virtual class,
   currently used for vectors of eigen values which can be
   \code{"numeric"} or \code{"complex"}.
@@ -15,4 +19,3 @@
 showClass("number")
 stopifnot( is(1i, "number"), is(pi, "number"), is(1:3, "number") )
 }
-\keyword{classes}

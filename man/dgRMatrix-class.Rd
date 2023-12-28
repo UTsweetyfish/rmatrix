@@ -1,11 +1,14 @@
 \name{dgRMatrix-class}
-\docType{class}
 \title{Sparse Compressed, Row-oriented Numeric Matrices}
+%
+\docType{class}
+\keyword{array}
+\keyword{classes}
+%
 \alias{dgRMatrix-class}
-% all alias{coerce,...} are currently in ./RsparseMatrix-class.Rd
-\alias{diag,dgRMatrix-method}
-\alias{dim,dgRMatrix-method}
-\alias{t,dgRMatrix-method}
+%
+\alias{determinant,dgRMatrix,logical-method}
+%
 \description{The \code{dgRMatrix} class is a class of sparse numeric
   matrices in the compressed, sparse, row-oriented format.  In this
   implementation the non-zero elements in the rows are sorted into
@@ -34,9 +37,6 @@
 }
 \section{Methods}{
   \describe{
-    \item{coerce}{\code{signature(from = "matrix", to = "dgRMatrix")}}
-    \item{coerce}{\code{signature(from = "dgRMatrix", to = "matrix")}}
-    \item{coerce}{\code{signature(from = "dgRMatrix", to = "dgTMatrix")}}
     \item{diag}{\code{signature(x = "dgRMatrix")}: returns the diagonal
       of \code{x}}
     \item{dim}{\code{signature(x = "dgRMatrix")}: returns the dimensions
@@ -51,5 +51,3 @@
   The \code{\linkS4class{dgCMatrix}} class (\bold{c}olumn compressed
   sparse) is really preferred.
 }
-\keyword{classes}
-\keyword{algebra}

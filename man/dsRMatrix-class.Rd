@@ -1,7 +1,13 @@
 \name{dsRMatrix-class}
 \title{Symmetric Sparse Compressed Row Matrices}
+%
 \docType{class}
+\keyword{array}
+\keyword{classes}
+%
 \alias{dsRMatrix-class}
+%
+\alias{determinant,dsRMatrix,logical-method}
 %
 \description{The \code{dsRMatrix} class is a class of symmetric, sparse
   matrices in the compressed, row-oriented format.  In this
@@ -51,8 +57,6 @@
      \item{forceSymmetric}{\code{signature(x = "dsRMatrix", uplo = "character")}:
        if \code{uplo == x@uplo}, this trivially returns \code{x};
        otherwise \code{t(x)}.}
-
-     \item{coerce}{\code{signature(from = "dsCMatrix", to = "dsRMatrix")}}
    }
 }
 \seealso{
@@ -60,6 +64,9 @@
   \code{\linkS4class{dgTMatrix}}, and \code{\linkS4class{dgeMatrix}}.
 }
 \examples{
+\dontshow{ % for R_DEFAULT_PACKAGES=NULL
+library(utils, pos = "package:base", verbose = FALSE)
+}
 (m0 <- new("dsRMatrix"))
 m2 <- new("dsRMatrix", Dim = c(2L,2L),
           x = c(3,1), j = c(1L,1L), p = 0:2)
@@ -70,5 +77,3 @@ str(m2)
 dR <- as(ds2, "RsparseMatrix")
 dR # dsRMatrix
 }
-\keyword{classes}
-\keyword{algebra}

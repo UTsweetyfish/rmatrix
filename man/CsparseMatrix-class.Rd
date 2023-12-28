@@ -1,29 +1,25 @@
 \name{CsparseMatrix-class}
+\title{Class "CsparseMatrix" of Sparse Matrices in Column-compressed Form}
+%
 \docType{class}
+\keyword{array}
+\keyword{classes}
+%
 \alias{CsparseMatrix-class}
-\alias{coerce,CsparseMatrix,lsparseMatrix-method}
-\alias{coerce,CsparseMatrix,lMatrix-method}
-\alias{coerce,CsparseMatrix,nsparseMatrix-method}
-\alias{coerce,CsparseMatrix,nMatrix-method}
-\alias{coerce,CsparseMatrix,TsparseMatrix-method}
-\alias{coerce,CsparseMatrix,denseMatrix-method}
-\alias{coerce,matrix,CsparseMatrix-method}
-\alias{coerce,numeric,CsparseMatrix-method}
-\alias{diag,CsparseMatrix-method}
-\alias{t,CsparseMatrix-method}
-% "[" are in ./Xtrct-methods.Rd; "[<-" in ./Subassign-methods.Rd
-%% Group methods --------- FIXME: not tested yet (or documented)
-\alias{Compare,CsparseMatrix,CsparseMatrix-method}
+%
 \alias{Arith,CsparseMatrix,CsparseMatrix-method}
 \alias{Arith,CsparseMatrix,numeric-method}
 \alias{Arith,numeric,CsparseMatrix-method}
+\alias{Compare,CsparseMatrix,CsparseMatrix-method}
 \alias{Logic,CsparseMatrix,CsparseMatrix-method}
-\alias{Math,CsparseMatrix-method}
-\alias{log,CsparseMatrix-method}
+\alias{coerce,matrix,CsparseMatrix-method}
+\alias{coerce,vector,CsparseMatrix-method}
+\alias{diag,CsparseMatrix-method}
+\alias{diag<-,CsparseMatrix-method}
+\alias{t,CsparseMatrix-method}
 %
 \alias{.validateCsparse}
 %
-\title{Class "CsparseMatrix" of Sparse Matrices in Column-compressed Form}
 \description{The \code{"CsparseMatrix"} class is the virtual class of
   all sparse matrices coded in sorted compressed column-oriented form.
   Since it is a virtual class, no objects may be created from it.  See
@@ -75,8 +71,6 @@ Class \code{"Matrix"}, by class \code{"sparseMatrix"}.
     \item{coerce}{\code{signature(from = "CsparseMatrix", to = "TsparseMatrix")}: ... }
     \item{coerce}{\code{signature(from = "CsparseMatrix", to = "denseMatrix")}: ... }
     \item{coerce}{\code{signature(from = "CsparseMatrix", to = "matrix")}: ... }
-    \item{coerce}{\code{signature(from = "CsparseMatrix", to = "lsparseMatrix")}: ... }
-    \item{coerce}{\code{signature(from = "CsparseMatrix", to = "nsparseMatrix")}: ... }
     \item{coerce}{\code{signature(from = "TsparseMatrix", to = "CsparseMatrix")}: ... }
     \item{coerce}{\code{signature(from = "denseMatrix", to = "CsparseMatrix")}: ... }
     \item{diag}{\code{signature(x = "CsparseMatrix")}: ... }
@@ -116,4 +110,3 @@ getClass("CsparseMatrix")
 ## The common validity check function (based on C code):
 getValidity(getClass("CsparseMatrix"))
 }
-\keyword{classes}

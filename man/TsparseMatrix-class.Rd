@@ -1,21 +1,16 @@
 \name{TsparseMatrix-class}
 \title{Class "TsparseMatrix" of Sparse Matrices in Triplet Form}
-\docType{class}
-\alias{TsparseMatrix-class}
-%% Methods:
-\alias{coerce,TsparseMatrix,CsparseMatrix-method}
-\alias{coerce,TsparseMatrix,lsparseMatrix-method}
-\alias{coerce,TsparseMatrix,lMatrix-method}
-\alias{coerce,TsparseMatrix,nsparseMatrix-method}
-\alias{coerce,TsparseMatrix,nMatrix-method}
-\alias{coerce,TsparseMatrix,matrix-method}
-\alias{coerce,Matrix,TsparseMatrix-method}
-\alias{coerce,matrix,TsparseMatrix-method}
-\alias{coerce,numeric,TsparseMatrix-method}
 %
-% "[" are in ./Xtrct-methods.Rd;  "[<-" in ./Subassign-methods.Rd
-%\alias{solve,...} --> solve-methods.Rd
-%\alias{\%*%,... } --> matrix-products.Rd
+\docType{class}
+\keyword{array}
+\keyword{classes}
+%
+\alias{TsparseMatrix-class}
+%
+\alias{coerce,matrix,TsparseMatrix-method}
+\alias{coerce,vector,TsparseMatrix-method}
+\alias{diag,TsparseMatrix-method}
+\alias{diag<-,TsparseMatrix-method}
 \alias{t,TsparseMatrix-method}
 %
 \description{The \code{"TsparseMatrix"} class is the virtual class of
@@ -81,4 +76,3 @@ T3 <- spMatrix(3,4, i=c(1,3:1), j=c(2,4:2), x=1:4)
 T3 # only 3 non-zero entries, 5 = 1+4 !
 \dontshow{stopifnot(nnzero(T3) == 3)}
 }
-\keyword{classes}

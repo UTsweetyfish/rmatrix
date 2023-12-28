@@ -1,7 +1,11 @@
 \name{CAex}
-\alias{CAex}
-\docType{data}
 \title{Albers' example Matrix with "Difficult" Eigen Factorization}
+%
+\docType{data}
+\keyword{datasets}
+%
+\alias{CAex}
+%
 \description{
   An example of a sparse matrix for which \code{\link{eigen}()} seemed
   to be difficult, an unscaled version of this has been posted to the
@@ -20,10 +24,12 @@
   In earlier versions of \R, \code{\link{eigen}(CAex)} fell into an
   infinite loop whereas \code{\link{eigen}(CAex, EISPACK=TRUE)} had been okay.
 }
-% \source{ see above
-% }
+% \source{}
 \examples{
-data(CAex)
+\dontshow{ % for R_DEFAULT_PACKAGES=NULL
+library(utils, pos = "package:base", verbose = FALSE)
+}
+data(CAex, package = "Matrix")
 str(CAex) # of class "dgCMatrix"
 
 image(CAex)# -> it's a simple band matrix with 5 bands
@@ -35,4 +41,3 @@ sCA <- as(CAex, "symmetricMatrix")
 stopifnot(class(sCA) == "dsCMatrix",
           as(sCA, "matrix") == as(CAex, "matrix"))
 }
-\keyword{datasets}

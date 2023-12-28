@@ -1,24 +1,15 @@
 \name{ngeMatrix-class}
-\docType{class}
 \title{Class "ngeMatrix" of General Dense Nonzero-pattern Matrices}
+%
+\docType{class}
+\keyword{array}
+\keyword{classes}
+%
 \alias{ngeMatrix-class}
 %
-\alias{!,ngeMatrix-method}
 \alias{Arith,ngeMatrix,ngeMatrix-method}
 \alias{Compare,ngeMatrix,ngeMatrix-method}
 \alias{Logic,ngeMatrix,ngeMatrix-method}
-\alias{as.vector,ngeMatrix-method}
-\alias{coerce,matrix,ngeMatrix-method}
-\alias{coerce,ngeMatrix,dgeMatrix-method}
-\alias{coerce,ngeMatrix,matrix-method}
-\alias{coerce,ngeMatrix,ngCMatrix-method}
-\alias{coerce,ngeMatrix,ngTMatrix-method}
-\alias{coerce,ngeMatrix,nsyMatrix-method}
-\alias{coerce,ngeMatrix,ntrMatrix-method}
-\alias{coerce,ngeMatrix,ntpMatrix-method}
-\alias{coerce,ngeMatrix,nspMatrix-method}
-\alias{diag<-,ngeMatrix-method}
-\alias{t,ngeMatrix-method}
 %
 \description{This is the class of general dense nonzero-pattern
   matrices, see \code{\linkS4class{nMatrix}}.
@@ -55,4 +46,3 @@ Class \code{"Matrix"}, by class \code{"ndenseMatrix"}.
 showClass("ngeMatrix")
 ## "lgeMatrix" is really more relevant
 }
-\keyword{classes}

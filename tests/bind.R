@@ -1,6 +1,8 @@
 #### Testing  cbind() & rbind() -- based on cbind2() & rbind2()
 ##   (where using 'cBind()' and 'rBind()' in  Matrix)
 
+## for R_DEFAULT_PACKAGES=NULL :
+library(utils)
 
 library(Matrix)
 
@@ -45,7 +47,7 @@ stopifnot(
 	       Matrix(rbind (m2, m1+m2)))
    ,
     Qidentical(show  (rbind(R1 = 10:11, M1)),
-	       Matrix(rbind(R1 = 10:11, m1)), strict=FALSE)
+	       Matrix(rbind(R1 = 10:11, m1)), strictClass=FALSE)
   , TRUE)
 
 identical.or.eq <- function(x,y, tol=0, ...) {
@@ -72,13 +74,11 @@ checkRN <- function(dd, B = rbind) {
 checkRN(10) # <==> ?cbind's ex
 checkRN(1:4)
 checkRN(       rbind(c(0:1,0,0)))
-if(getRversion() >= "3.5.0")
 checkRN(Matrix(rbind(c(0:1,0,0)))) ## in R <= 3.4.1, from methods:::rbind bug :
 ## Modes: character, NULL Lengths: 4, 0 target is character, current is NULL
 checkRN(10 ,				rbind)
 checkRN(1:4,				rbind)
 checkRN(       rbind(c(0:1,0,0)),  	rbind)
-if(getRversion() >= "3.5.0") ## in R <= 3.4.x, from methods:::rbind bug
 checkRN(Matrix(rbind(c(0:1,0,0))), 	rbind)
 
 cbind(0, Matrix(0+0:1, 1,2), 3:2)# FIXME? should warn - as with matrix()
@@ -92,6 +92,18 @@ str(im)
 str(mi)
 (m1m <- cbind(M,I=100,M2))
 showProc.time()
+
+## lgeMatrix -- rbind2() had bug (in C code):
+is.lge <- function(M) isValid(M, "lgeMatrix")
+stopifnot(exprs = {
+    is.lge(rbind(M2 > 0, M2 < 0)) # had Error in rbind2():
+    ## REAL() can only be applied to a 'numeric', not a 'logical'
+    is.lge(rbind(M2 < 0, M2 > 0)) # ditto
+    is.lge(rbind(Matrix(1:6 %% 3 != 0, 2,3), FALSE))
+    is.lge(L <- rbind(Matrix(TRUE, 2,3), TRUE))
+    all(L)
+    is.lge(rbind(Matrix(TRUE, 2,3), FALSE))
+})
 
 ### --- Diagonal / Sparse - had bugs
 
@@ -110,8 +122,8 @@ assert.EQ.mat(d4, rbind(diag(4),    0:3))
 assert.EQ.mat(m4, cbind(diag(-1:2), 0:3))
 stopifnot(identical(Matrix(cbind(diag(3),0)), cbind2(Diagonal(3),0)),
 	  is(d4, "sparseMatrix"), is(m4, "sparseMatrix"),
-	  identical(t(d4), cbind(Diagonal(4),     0:3)),
-	  identical(t(m4), rbind(Diagonal(x=-1:2), 0:3)))
+	  identical(.tCRT(d4), cbind(Diagonal(4),     0:3)),
+	  identical(.tCRT(m4), rbind(Diagonal(x=-1:2), 0:3)))
 showProc.time()
 
 ### --- Sparse Matrices ---
@@ -121,12 +133,13 @@ identical4(cbind(diag(4), diag(4)),
            cbind(D4T, D4C),
            cbind(D4C, D4T))
 nr <- 4
-m. <- matrix(c(0, 2:-1),  nr ,6)
+nc <- 6
+m. <- matrix(rep_len(c(0, 2:-1), nr * nc), nr, nc)
 M <- Matrix(m.)
-(mC <- as(M, "dgCMatrix"))
-(mT <- as(M, "dgTMatrix"))
-stopifnot(identical(mT, as(mC, "dgTMatrix")),
-          identical(mC, as(mT, "dgCMatrix")))
+(mC <- as(M, "CsparseMatrix"))
+(mT <- as(M, "TsparseMatrix"))
+stopifnot(identical(mT, as(mC, "TsparseMatrix")),
+          identical(mC, as(mT, "CsparseMatrix")))
 
 for(v in list(0, 2, 1:0))
     for(fnam in c("cbind", "rbind")) {
@@ -147,8 +160,9 @@ cbind(diag(nr), mT)
 stopifnot(identical(t(cbind(diag(nr),   mT)),
                       rbind(diag(nr), t(mT))))
 (cc <- cbind(mC, 0,7,0, diag(nr), 0))
-stopifnot(identical3(cc, cbind(mT, 0,7,0, diag(nr), 0),
-                     as( cbind( M, 0,7,0, diag(nr), 0), "dgCMatrix")))
+stopifnot(identical3(cc,
+                     as(cbind(mT, 0, 7, 0, diag(nr), 0), "CsparseMatrix"),
+                     as(cbind( M, 0, 7, 0, diag(nr), 0), "CsparseMatrix")))
 
 cbind(mC, 1, 100*mC, 0, 0:2)
 cbind(mT, 1, 0, mT+10*mT, 0, 0:2)
@@ -163,7 +177,8 @@ cbind(mT, one, zero, mT+10*mT, zero, 0:2)
 
 
 ## logical (sparse) - should remain logical :
-L5 <- Diagonal(n = 5, x = TRUE); v5 <- rep(x = c(FALSE,TRUE), length = ncol(L5))
+L5 <- Diagonal(n = 5, x = TRUE)
+v5 <- rep(x = c(FALSE,TRUE), length.out = ncol(L5))
 stopifnot(is(show(rbind(L5,v5)), "lsparseMatrix"),
 	  is(show(cbind(v5,L5)), "lsparseMatrix"),
 	  is(rbind(L5, 2* v5), "dsparseMatrix"),
@@ -188,8 +203,8 @@ s42 <- Matrix(z42 <- cbind2(rep(0:1,4), rep(1:0,4)),
               sparse=TRUE)
 (C86 <- rbind(1, 0, D5.1, 0))
 stopifnotValid(D5.1, "dgCMatrix")
-stopifnotValid(print(rbind2(Matrix(1:10, 2,5), D5)),   "dgCMatrix")
-stopifnotValid(print(cbind2(Matrix(10:1, 5,2), D5.1)), "dgeMatrix")
+stopifnotValid(print(rbind2(Matrix(1:10, 2,5), D5)),   "dgRMatrix")
+stopifnotValid(print(cbind2(Matrix(10:1, 5,2), D5.1)), "dgCMatrix")
 stopifnotValid(zz <- cbind2(z42, C86), "dgCMatrix")
 stopifnot(identical(zz, cbind2(s42, C86)))
 

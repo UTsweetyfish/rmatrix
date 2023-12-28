@@ -1,12 +1,15 @@
 \name{symmetricMatrix-class}
+\title{Virtual Class of Symmetric Matrices in Package Matrix}
+%
 \docType{class}
+\keyword{array}
+\keyword{classes}
+%
 \alias{symmetricMatrix-class}
+%
 \alias{coerce,matrix,symmetricMatrix-method}
-\alias{coerce,denseMatrix,symmetricMatrix-method}
-\alias{coerce,CsparseMatrix,symmetricMatrix-method}
 \alias{dimnames,symmetricMatrix-method}
 %
-\title{Virtual Class of Symmetric Matrices in Package Matrix}
 \description{
   The virtual class of symmetric matrices, \code{"symmetricMatrix"},
   from the package \pkg{Matrix} contains numeric and logical, dense and
@@ -36,9 +39,6 @@
 }
 \section{Methods}{
   \describe{
-    \item{coerce}{\code{signature(from = "ddiMatrix", to =
-	"symmetricMatrix")}: and many other coercion methods, some of
-      which are particularly optimized.}
     \item{dimnames}{\code{signature(object = "symmetricMatrix")}:
       returns \emph{symmetric} \code{\link{dimnames}}, even when the
       \code{Dimnames} slot only has row or column names.  This allows to
@@ -88,4 +88,3 @@ names(scl)[directly]
 ## Methods -- applicaple to all subclasses above:
 showMethods(classes = "symmetricMatrix")
 }
-\keyword{classes}

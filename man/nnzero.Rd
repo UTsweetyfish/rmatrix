@@ -1,12 +1,22 @@
-\name{nnzero}
+\name{nnzero-methods}
 \title{The Number of Non-Zero Values of a Matrix}
+%
+\docType{methods}
+\keyword{array}
+\keyword{logic}
+\keyword{methods}
+%
 \alias{nnzero}
+\alias{nnzero-methods}
+%
 \alias{nnzero,ANY-method}
+\alias{nnzero,CHMfactor-method}
 \alias{nnzero,denseMatrix-method}
 \alias{nnzero,diagonalMatrix-method}
 \alias{nnzero,indMatrix-method}
 \alias{nnzero,sparseMatrix-method}
-\alias{nnzero,CHMfactor-method}
+\alias{nnzero,vector-method}
+%
 \description{
   Returns the number of non-zero values of a numeric-like \R object, and
   in particular an object \code{x} inheriting from class
@@ -68,16 +78,19 @@ nnzero(x, na.counted = NA)
   \code{\link{drop0}}, \code{\link{zapsmall}}.
 }
 \examples{
+\dontshow{ % for R_DEFAULT_PACKAGES=NULL
+library(utils, pos = "package:base", verbose = FALSE)
+}
 m <- Matrix(0+1:28, nrow = 4)
 m[-3,c(2,4:5,7)] <- m[ 3, 1:4] <- m[1:3, 6] <- 0
-(mT <- as(m, "dgTMatrix"))
+(mT <- as(m, "TsparseMatrix"))
 nnzero(mT)
 (S <- crossprod(mT))
 nnzero(S)
 str(S) # slots are smaller than nnzero()
 stopifnot(nnzero(S) == sum(as.matrix(S) != 0))# failed earlier
 
-data(KNex)
+data(KNex, package = "Matrix")
 M <- KNex$mm
 class(M)
 dim(M)
@@ -86,5 +99,3 @@ nnzero(M) # more relevant than length
 ## the above are also visible from
 str(M)
 }
-\keyword{attribute}
-

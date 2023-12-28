@@ -1,17 +1,18 @@
 \name{image-methods}
 \title{Methods for image() in Package 'Matrix'}
+%
 \docType{methods}
-%\alias{image}% <- needed for \usage{.}
+\keyword{hplot}
+\keyword{methods}
+%
+\alias{image}
 \alias{image-methods}
+%
 \alias{image,ANY-method}
 \alias{image,CHMfactor-method}
 \alias{image,Matrix-method}
-\alias{image,dgRMatrix-method}
-\alias{image,dgCMatrix-method}
 \alias{image,dgTMatrix-method}
-\alias{image,dsparseMatrix-method}
-\alias{image,lsparseMatrix-method}
-\alias{image,nsparseMatrix-method}
+%
 \description{
   Methods for function \code{\link[graphics]{image}} in package
   \pkg{Matrix}.  An image of a matrix simply color codes all matrix
@@ -23,7 +24,7 @@
   these methods return an \dQuote{object} of class \code{"trellis"},
   producing a graphic when (auto-) \code{\link{print}()}ed.
 }
-\usage{% want \usage{} since we have many "surprising arguments"
+\usage{ % want \usage{} since we have many "surprising arguments"
 \S4method{image}{dgTMatrix}(x,
       xlim = c(1, di[2]),
       ylim = c(di[1], 1), aspect = "iso",
@@ -99,14 +100,19 @@
   \code{\link[lattice]{print.trellis}} from package \pkg{lattice}.
 }
 \examples{
+\dontshow{ % for R_DEFAULT_PACKAGES=NULL
+library(grDevices, pos = "package:base", verbose = FALSE)
+library(    utils, pos = "package:base", verbose = FALSE)
+}
 showMethods(image)
-## If you want to see all the methods' implementations:
-showMethods(image, incl=TRUE, inherit=FALSE)
-\dontshow{## warnings should not happen here, notably when print(<trellis>)
+## And if you want to see the method definitions:
+showMethods(image, includeDefs = TRUE, inherited = FALSE)
+\dontshow{ % warnings should not happen here, notably when print(<trellis>)
 op <- options(warn = 2)
 }
-data(CAex)
-image(CAex, main = "image(CAex)")
+data(CAex, package = "Matrix")
+image(CAex, main = "image(CAex)") -> imgC; imgC
+stopifnot(!is.null(leg <- imgC$legend), is.list(leg$right)) # failed for 2 days ..
 image(CAex, useAbs=TRUE, main = "image(CAex, useAbs=TRUE)")
 
 cCA <- Cholesky(crossprod(CAex), Imult = .01)
@@ -116,7 +122,7 @@ print(image(cCA, main="Cholesky(crossprod(CAex), Imult = .01)"),
 print(image(cCA, useAbs=TRUE),
       split=c(x=2,y=1,nx=2,ny=1))
 
-data(USCounties)
+data(USCounties, package = "Matrix")
 image(USCounties)# huge
 image(sign(USCounties))## just the pattern
     # how the result looks, may depend heavily on
@@ -139,8 +145,7 @@ stopifnot(all.equal(I1, I2, check.environment=FALSE),
 ## using an opaque border color
 image(USCounties, c(1,100), c(1,100), useAbs=FALSE, lwd=3, border.col = adjustcolor("skyblue", 1/2))
 \dontshow{options(op)}
-if(doExtras <- interactive() || nzchar(Sys.getenv("R_MATRIX_CHECK_EXTRA")) ||
-    identical("true", unname(Sys.getenv("R_PKG_CHECKING_doExtras")))) {
+if(interactive() || nzchar(Sys.getenv("R_MATRIX_CHECK_EXTRA"))) {
 ## Using raster graphics: For PDF this would give a 77 MB file,
 ## however, for such a large matrix, this is typically considerably
 ## *slower* (than vector graphics rectangles) in most cases :
@@ -152,5 +157,3 @@ if(doPNG)
    ## and now look at the *.png image in a viewer you can easily zoom in and out
 }#only if(doExtras)
 }
-\keyword{methods}
-\keyword{hplot}

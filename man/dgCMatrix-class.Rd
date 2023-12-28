@@ -1,38 +1,18 @@
 \name{dgCMatrix-class}
-\docType{class}
 \title{Compressed, sparse, column-oriented numeric matrices}
+%
+\docType{class}
+\keyword{array}
+\keyword{classes}
+%
 \alias{dgCMatrix-class}
-\alias{as.vector,dgCMatrix-method}
-\alias{coerce,matrix,dgCMatrix-method}
-\alias{coerce,ddiMatrix,dgCMatrix-method}
-\alias{coerce,dgeMatrix,dgCMatrix-method}
-\alias{coerce,dgCMatrix,dgTMatrix-method}
-\alias{coerce,dgCMatrix,dsCMatrix-method}% deprecated
-\alias{coerce,dgCMatrix,dtCMatrix-method}
-\alias{coerce,dgCMatrix,lgCMatrix-method}
-\alias{coerce,dgCMatrix,ngCMatrix-method}
-\alias{coerce,dgCMatrix,dgeMatrix-method}
-\alias{coerce,dgCMatrix,matrix-method}
-\alias{coerce,dgCMatrix,vector-method}
-\alias{coerce,factor,dgCMatrix-method}
-\alias{diag,dgCMatrix-method}
-\alias{dim,dgCMatrix-method}
-%\alias{lu,dgCMatrix-method}-> ./lu.Rd
-\alias{isSymmetric,dgCMatrix-method}
-\alias{t,dgCMatrix-method}
-%\alias{solve,dgCMatrix,matrix-method}--> solve-methods.Rd
-%% Group methods --------- FIXME: These are not tested yet (or documented)
-\alias{Arith,logical,dgCMatrix-method}
-\alias{Arith,numeric,dgCMatrix-method}
+\alias{Arith,dgCMatrix,dgCMatrix-method}
 \alias{Arith,dgCMatrix,logical-method}
 \alias{Arith,dgCMatrix,numeric-method}
-\alias{Arith,dgCMatrix,dgCMatrix-method}
-% for silly reasons, need these 2+3 as well:
-\alias{round,dgCMatrix,numeric-method}
-\alias{signif,dgCMatrix,numeric-method}
-\alias{log,dgCMatrix-method}
-\alias{gamma,dgCMatrix-method}
-\alias{lgamma,dgCMatrix-method}
+\alias{Arith,logical,dgCMatrix-method}
+\alias{Arith,numeric,dgCMatrix-method}
+\alias{coerce,matrix,dgCMatrix-method}
+\alias{determinant,dgCMatrix,logical-method}
 %
 \description{The \code{dgCMatrix} class is a class of sparse numeric
   matrices in the compressed, sparse, column-oriented format.  In this
@@ -60,8 +40,6 @@
   Matrix products (e.g., \link{crossprod-methods}), and (among other)
   \describe{
     \item{coerce}{\code{signature(from = "matrix", to = "dgCMatrix")}}
-    \item{coerce}{\code{signature(from = "dgCMatrix", to = "matrix")}}
-    \item{coerce}{\code{signature(from = "dgCMatrix", to = "dgTMatrix")}}
     \item{diag}{\code{signature(x = "dgCMatrix")}: returns the diagonal
       of \code{x}}
     \item{dim}{\code{signature(x = "dgCMatrix")}: returns the dimensions
@@ -83,6 +61,9 @@
   \code{\linkS4class{dtCMatrix}}, \code{\link{lu}}
 }
 \examples{
+\dontshow{ % for R_DEFAULT_PACKAGES=NULL
+library(utils, pos = "package:base", verbose = FALSE)
+}
 (m <- Matrix(c(0,0,2:0), 3,5))
 str(m)
 m[,1]
@@ -92,5 +73,3 @@ stopifnot(inherits(try(new("dgCMatrix", i = 0:1, p = 0:2,
           "try-error"))
 }
 }
-\keyword{classes}
-\keyword{algebra}

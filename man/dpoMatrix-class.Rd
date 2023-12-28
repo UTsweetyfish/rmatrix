@@ -1,65 +1,58 @@
 \name{dpoMatrix-class}
 \title{Positive Semi-definite Dense (Packed | Non-packed) Numeric Matrices}
+%
 \docType{class}
+\keyword{array}
+\keyword{classes}
+%
 \alias{dpoMatrix-class}
 \alias{dppMatrix-class}
 \alias{corMatrix-class}
-%      ---
-\alias{coerce,dpoMatrix,corMatrix-method}
-\alias{coerce,dpoMatrix,dppMatrix-method}
-\alias{coerce,dpoMatrix,lMatrix-method}
-\alias{coerce,dpoMatrix,nMatrix-method}
-\alias{coerce,dppMatrix,lMatrix-method}
-\alias{coerce,dppMatrix,nMatrix-method}
-\alias{coerce,dppMatrix,sparseMatrix-method}
-\alias{coerce,dppMatrix,CsparseMatrix-method}
-\alias{coerce,dppMatrix,dpoMatrix-method}
-\alias{coerce,dspMatrix,dpoMatrix-method}
-\alias{coerce,dspMatrix,dppMatrix-method}
-\alias{coerce,matrix,corMatrix-method}
-\alias{coerce,Matrix,corMatrix-method}
-\alias{coerce,matrix,dpoMatrix-method}
-\alias{coerce,Matrix,dpoMatrix-method}
-\alias{coerce,matrix,dppMatrix-method}
-\alias{coerce,Matrix,dppMatrix-method}
-%\alias{coerce,corMatrix,lMatrix-method}
-\alias{Ops,dpoMatrix,logical-method}
-\alias{Ops,dpoMatrix,numeric-method}
-\alias{Ops,dppMatrix,logical-method}
-\alias{Ops,dppMatrix,numeric-method}
-\alias{Ops,logical,dpoMatrix-method}
-\alias{Ops,logical,dppMatrix-method}
-\alias{Ops,numeric,dpoMatrix-method}
-\alias{Ops,numeric,dppMatrix-method}
+\alias{pcorMatrix-class}
+%
 \alias{Arith,dpoMatrix,logical-method}
 \alias{Arith,dpoMatrix,numeric-method}
+\alias{Arith,logical,dpoMatrix-method}
+\alias{Arith,numeric,dpoMatrix-method}
+\alias{Ops,dpoMatrix,logical-method}
+\alias{Ops,dpoMatrix,numeric-method}
+\alias{Ops,logical,dpoMatrix-method}
+\alias{Ops,numeric,dpoMatrix-method}
+\alias{coerce,dpoMatrix,corMatrix-method}
+\alias{coerce,dpoMatrix,dppMatrix-method}
+\alias{coerce,matrix,dpoMatrix-method}
+\alias{determinant,dpoMatrix,logical-method}
+%
 \alias{Arith,dppMatrix,logical-method}
 \alias{Arith,dppMatrix,numeric-method}
-\alias{Arith,logical,dpoMatrix-method}
 \alias{Arith,logical,dppMatrix-method}
-\alias{Arith,numeric,dpoMatrix-method}
 \alias{Arith,numeric,dppMatrix-method}
-%
-\alias{rcond,dpoMatrix,character-method}
-\alias{rcond,dppMatrix,character-method}
-\alias{rcond,dpoMatrix,missing-method}
-\alias{rcond,dppMatrix,missing-method}
-\alias{determinant,dpoMatrix,logical-method}
+\alias{Ops,dppMatrix,logical-method}
+\alias{Ops,dppMatrix,numeric-method}
+\alias{Ops,logical,dppMatrix-method}
+\alias{Ops,numeric,dppMatrix-method}
+\alias{coerce,dppMatrix,dpoMatrix-method}
+\alias{coerce,dppMatrix,pcorMatrix-method}
+\alias{coerce,matrix,dppMatrix-method}
 \alias{determinant,dppMatrix,logical-method}
-\alias{determinant,dpoMatrix,missing-method}
-\alias{determinant,dppMatrix,missing-method}
-%\alias{solve,dpoMatrix,...-method}--> solve-methods.Rd
-\alias{t,dppMatrix-method}
+%
+\alias{coerce,corMatrix,pcorMatrix-method}
+\alias{coerce,matrix,corMatrix-method}
+%
+\alias{coerce,pcorMatrix,corMatrix-method}
+\alias{coerce,matrix,pcorMatrix-method}
+%
 \description{
   \itemize{
-    \item{The \code{"dpoMatrix"} class is the class of
-      positive-semidefinite symmetric matrices in nonpacked storage.}
-    \item{The \code{"dppMatrix"} class is the same except in packed
+    \item The \code{"dpoMatrix"} class is the class of
+      positive-semidefinite symmetric matrices in nonpacked storage.
+    \item The \code{"dppMatrix"} class is the same except in packed
       storage.  Only the upper triangle or the lower triangle is
-      required to be available.}
-    \item{The \code{"corMatrix"} class of correlation matrices extends
-      \code{"dpoMatrix"} with a slot \code{sd}, which allows to restore
-      the original covariance matrix.}
+      required to be available.
+    \item The \code{"corMatrix"} and \code{"pcorMatrix"} classes
+      represent correlation matrices.  They extend \code{"dpoMatrix"}
+      and \code{"dppMatrix"}, respectively, with an additional slot
+      \code{sd} allowing restoration of the original covariance matrix.
   }
 }
 \section{Objects from the Class}{Objects can be created by calls of the
@@ -78,10 +71,10 @@
     \item{\code{factors}:}{Object of class \code{"list"}.  A named
       list of factorizations that have been computed for the matrix.}
 
-    \item{\code{sd}:}{(for \code{"corMatrix"}) a \code{\link{numeric}}
-      vector of length \code{n} containing the (original)
-      \eqn{\sqrt{var(.)}}{sqrt(var(.))} entries which allow
-	reconstruction of a covariance matrix from the correlation matrix.}
+    \item{\code{sd}:}{(for \code{"corMatrix"} and \code{"pcorMatrix"})
+      a \code{\link{numeric}} vector of length \code{n} containing the
+      (original) \eqn{\sqrt{var(.)}}{sqrt(var(.))} entries which allow
+      reconstruction of a covariance matrix from the correlation matrix.}
   }
 }
 \section{Extends}{
@@ -102,8 +95,8 @@
       \code{x}.  The \code{norm} can be \code{"O"} for the
       one-norm (the default) or \code{"I"} for the infinity-norm.  For
       symmetric matrices the result does not depend on the norm.}
-    \item{solve}{\code{signature(a = "dpoMatrix", b = "....")}}{, and}
-    \item{solve}{\code{signature(a = "dppMatrix", b = "....")}}{work
+    \item{solve}{\code{signature(a = "dpoMatrix", b = "....")}, and}
+    \item{solve}{\code{signature(a = "dppMatrix", b = "....")}  work
       via the Cholesky composition, see also the Matrix \code{\link{solve-methods}}.}
     \item{Arith}{\code{signature(e1 = "dpoMatrix", e2 = "numeric")} (and
       quite a few other signatures): The result of (\dQuote{elementwise}
@@ -115,26 +108,45 @@
 }
 %\references{}
 %\author{}
+\note{Currently the validity methods for these classes such as
+  \code{\link{getValidity}(getClass("dpoMatrix"))} for efficiency reasons
+  only check the diagonal entries of the matrix -- they may not be negative.
+  This is only necessary but not sufficient for a symmetric matrix to be
+  positive semi-definite.
+
+  A more reliable (but often more expensive) check for positive
+  semi-definiteness would look at the signs of \code{diag(\link{BunchKaufman}(.))}
+  (with some tolerance for very small negative values), and for (strict)
+  positive definiteness at something like
+  \code{!inherits(tryCatch(chol(.), error=identity), "error")} .
+  Indeed, when \emph{coercing} to these classes, a version
+  of \code{\link{Cholesky}()} or \code{\link{chol}()} is
+  typically used, e.g., see \code{selectMethod("coerce",
+    c(from="dsyMatrix", to="dpoMatrix"))} .
+}
 \seealso{
   Classes \code{\linkS4class{dsyMatrix}} and \code{\linkS4class{dgeMatrix}};
   further, \code{\link{Matrix}}, \code{\link{rcond}},
   \code{\link[base]{chol}}, \code{\link[base]{solve}}, \code{\link{crossprod}}.
 }
 \examples{
+\dontshow{ % for R_DEFAULT_PACKAGES=NULL
+library(utils, pos = "package:base", verbose = FALSE)
+}
 h6 <- Hilbert(6)
 rcond(h6)
 str(h6)
 h6 * 27720 # is ``integer''
 solve(h6)
-str(hp6 <- as(h6, "dppMatrix"))
+str(hp6 <- pack(h6))
 
 ### Note that  as(*, "corMatrix")  *scales* the matrix
 (ch6 <- as(h6, "corMatrix"))
-stopifnot(all.equal(h6 * 27720, round(27720 * h6), tolerance = 1e-14),
-          all.equal(ch6@sd^(-2), 2*(1:6)-1, tolerance= 1e-12))
-chch <- chol(ch6)
+stopifnot(all.equal(as(h6 * 27720, "dsyMatrix"), round(27720 * h6),
+                    tolerance = 1e-14),
+          all.equal(ch6@sd^(-2), 2*(1:6)-1,
+                    tolerance = 1e-12))
+chch <- Cholesky(ch6, perm = FALSE)
 stopifnot(identical(chch, ch6@factors$Cholesky),
-          all(abs(crossprod(chch) - ch6) < 1e-10))
+          all(abs(crossprod(as(chch, "dtrMatrix")) - ch6) < 1e-10))
 }
-\keyword{classes}
-\keyword{algebra}

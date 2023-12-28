@@ -1,41 +1,45 @@
 \name{denseMatrix-class}
-\docType{class}
 \title{Virtual Class "denseMatrix" of All Dense Matrices}
-\alias{denseMatrix-class}
-%% Group methods
-\alias{Math,denseMatrix-method}
-\alias{log,denseMatrix-method}
-\alias{-,denseMatrix,missing-method}
 %
-\alias{show,denseMatrix-method}
+\docType{class}
+\keyword{array}
+\keyword{classes}
+%
+\alias{denseMatrix-class}
+%
+\alias{-,denseMatrix,missing-method}
+\alias{Math,denseMatrix-method}
+\alias{Summary,denseMatrix-method}
 \alias{coerce,ANY,denseMatrix-method}
-\alias{coerce,denseMatrix,CsparseMatrix-method}
-\alias{coerce,denseMatrix,TsparseMatrix-method}
-\alias{coerce,denseMatrix,generalMatrix-method}
-\alias{coerce,denseMatrix,sparseMatrix-method}
-\alias{cbind2,denseMatrix,denseMatrix-method}
-\alias{cbind2,denseMatrix,matrix-method}
-\alias{cbind2,matrix,denseMatrix-method}
-\alias{cbind2,denseMatrix,numeric-method}
-\alias{cbind2,numeric,denseMatrix-method}
-\alias{rbind2,denseMatrix,denseMatrix-method}
-\alias{rbind2,denseMatrix,matrix-method}
-\alias{rbind2,matrix,denseMatrix-method}
-\alias{rbind2,denseMatrix,numeric-method}
-\alias{rbind2,numeric,denseMatrix-method}
+\alias{coerce,matrix,denseMatrix-method}
+\alias{coerce,vector,denseMatrix-method}
+\alias{diag,denseMatrix-method}
+\alias{diag<-,denseMatrix-method}
+\alias{diff,denseMatrix-method}
 \alias{dim<-,denseMatrix-method}
-\alias{rcond,denseMatrix,character-method}
+\alias{log,denseMatrix-method}
+\alias{mean,denseMatrix-method}
+\alias{rep,denseMatrix-method}
+\alias{show,denseMatrix-method}
+\alias{t,denseMatrix-method}
 %
 \description{This is the virtual class of all dense (S4) matrices.
-  It is the direct superclass of
+  It partitions into two subclasses
+  \code{\linkS4class{packedMatrix}} and
+  \code{\linkS4class{unpackedMatrix}}.
+  Alternatively into the (currently) three subclasses
   \code{\linkS4class{ddenseMatrix}},
-  \code{\linkS4class{ldenseMatrix}}
+  \code{\linkS4class{ldenseMatrix}}, and
+  \code{\linkS4class{ndenseMatrix}}.
+
+  \code{denseMatrix} is (hence) the direct superclass of these (\eqn{2+3 = 5}) classes.
 }
 \section{Extends}{
   class \code{"Matrix"} directly.
 }
 \section{Slots}{
-  exactly those of its superclass \code{"\linkS4class{Matrix}"}.
+  exactly those of its superclass \code{"\linkS4class{Matrix}"}, i.e.,
+  \code{"Dim"} and \code{"Dimnames"}.
 }
 %
 \section{Methods}{
@@ -55,4 +59,3 @@
 \examples{
 showClass("denseMatrix")
 }
-\keyword{classes}

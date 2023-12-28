@@ -1,7 +1,13 @@
 \name{condest}
+\title{Compute Approximate CONDition number and 1-Norm of (Large) Matrices}
+%
+\keyword{algebra}
+\keyword{math}
+\keyword{utilities}
+%
 \alias{condest}
 \alias{onenormest}
-\title{Compute Approximate CONDition number and 1-Norm of (Large) Matrices}
+%
 \description{
   \dQuote{Estimate}, i.e. compute approximately the CONDition number of
   a (potentially large, often sparse) matrix \code{A}.
@@ -62,12 +68,12 @@ onenormest(A, t = min(n, 5), A.x, At.x, n,
 }
 \references{
 %% See also Tim Davis(2006, p.96):
-  Nicholas J. Higham and Françoise Tisseur (2000).
-  A Block Algorithm for Matrix 1-Norm Estimation, with an Application to 1-Norm
-  Pseudospectra.
+  Nicholas J. Higham and \enc{Françoise}{Francoise} Tisseur (2000).
+  A Block Algorithm for Matrix 1-Norm Estimation, with an Application
+  to 1-Norm Pseudospectra.
   \emph{SIAM J. Matrix Anal. Appl.} \bold{21}, 4, 1185--1201.
-  %% ok for ETH etc, but not free:  \doi{10.1137/S0895479899356080}
-  \url{https://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.7.9804}
+  %% OK for ETH, etc., but not free: \doi{10.1137/S0895479899356080}
+  %% broken on 2022-10-20: \url{https://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.7.9804}
 
   William W. Hager (1984).
   Condition Estimates.
@@ -82,7 +88,10 @@ onenormest(A, t = min(n, 5), A.x, At.x, n,
   \code{\link{norm}}, \code{\link{rcond}}.
 }
 \examples{
-data(KNex)
+\dontshow{ % for R_DEFAULT_PACKAGES=NULL
+library(utils, pos = "package:base", verbose = FALSE)
+}
+data(KNex, package = "Matrix")
 mtm <- with(KNex, crossprod(mm))
 system.time(ce <- condest(mtm))
 sum(abs(ce$v)) ## || v ||_1  == 1
@@ -94,7 +103,7 @@ stopifnot(all.equal(norm(mtm \%*\% ce$v),
 1 / ce$est
 system.time(rc <- rcond(mtm)) # takes ca  3 x  longer
 rc
-all.equal(rc, 1/ce$est) # TRUE -- the approxmation was good
+all.equal(rc, 1/ce$est) # TRUE -- the approximation was good
 
 one <- onenormest(mtm)
 str(one) ## est = 12.3

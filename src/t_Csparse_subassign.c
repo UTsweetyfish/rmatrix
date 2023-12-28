@@ -2,9 +2,7 @@
  *                       --------     ~~~~~~~~~~~~~~~~~~~~~~
  * i.e., included several times from ./Csparse.c
  *                                   ~~~~~~~~~~~
- *
- _slot_kind : use the integer codes matching  x_slot_kind in ./Mutils.h
- *							       ~~~~~~~~
+ * _slot_kind : use the integer codes matching x_slot_kind in ./Csparse.c
  */
 
 #ifdef _d_Csp_
@@ -213,20 +211,20 @@ SEXP Csparse_subassign(SEXP x, SEXP i_, SEXP j_, SEXP value)
     SEXP ans;
     /* Instead of simple "duplicate": PROTECT(ans = duplicate(x)) , build up: */
     // Assuming that ans will have the same basic Matrix type as x :
-    ans = PROTECT(NEW_OBJECT_OF_CLASS(valid_cM[ctype_x]));
+    ans = PROTECT(newObject(valid_cM[ctype_x]));
     SET_SLOT(ans, Matrix_DimSym,      duplicate(dimslot));
-    slot_dup(ans, x, Matrix_DimNamesSym);
-    slot_dup(ans, x, Matrix_pSym);
+    SET_SLOT(ans, Matrix_DimNamesSym, duplicate(GET_SLOT(x, Matrix_DimNamesSym)));
+    SET_SLOT(ans, Matrix_pSym,        duplicate(GET_SLOT(x, Matrix_pSym)));
     SEXP r_pslot = GET_SLOT(ans, Matrix_pSym);
     // and assign the i- and x- slots at the end, as they are potentially modified
     // not just in content, but also in their *length*
     int *rp = INTEGER(r_pslot),
-	*ri = Calloc(nnz_x, int);       // to contain the final i - slot
+	*ri = R_Calloc(nnz_x, int);       // to contain the final i - slot
     Memcpy(ri, INTEGER(islot), nnz_x);
     Type_x_0_init(z_ans);
     Type_x_1_init(one_ans);
 #ifdef _has_x_slot_
-    Type_x *rx = Calloc(nnz_x, Type_x); // to contain the final x - slot
+    Type_x *rx = R_Calloc(nnz_x, Type_x); // to contain the final x - slot
     Memcpy(rx, STYP_x(GET_SLOT(x, Matrix_xSym)), nnz_x);
 #endif
     // NB:  nnz_x : will always be the "current allocated length" of (i, x) slots
@@ -269,8 +267,8 @@ SEXP Csparse_subassign(SEXP x, SEXP i_, SEXP j_, SEXP value)
 		    v = (value_is_nsp) ? one_ans : val_x[j_val];
 		    j_val++;// from now on, look at the next non-zero entry
 		} else { //  ii_v1 > val_i[j_val]
-		    REprintf("programming thinko in Csparse_subassign(*, i=%d,j=%d): ii_v=%d, v@i[j_val=%ld]=%g\n",
-			     i__,j__, ii_v1, j_val, val_i[j_val]);
+		    REprintf("programming thinko in Csparse_subassign(*, i=%d,j=%d): ii_v=%lld, v@i[j_val=%d]=%g\n",
+			     i__,j__, (long long)ii_v1, j_val, val_i[j_val]);
 		    j_val++;// from now on, look at the next non-zero entry
 		}
 	    }
@@ -367,7 +365,7 @@ SEXP Csparse_subassign(SEXP x, SEXP i_, SEXP j_, SEXP value)
 		    // extend the  i  and  x  slot by one entry : ---------------------
 		    if(nnz+1 > nnz_x) { // need to reallocate:
 #ifdef MATRIX_SUBASSIGN_VERBOSE
-			if(verbose) REprintf(" Realloc()ing: nnz_x=%d", nnz_x);
+			if(verbose) REprintf(" R_Realloc()ing: nnz_x=%d", nnz_x);
 #endif
 			// do it "only" 1x,..4x at the very most increasing by the
 			// nnz-length of "value":
@@ -376,9 +374,9 @@ SEXP Csparse_subassign(SEXP x, SEXP i_, SEXP j_, SEXP value)
 			if(verbose) REprintf("(nnz_v=%d) --> %d ", nnz_val, nnz_x);
 #endif
 			// C doc on realloc() says that the old content is *preserve*d
-			ri = Realloc(ri, nnz_x, int);
+			ri = R_Realloc(ri, nnz_x, int);
 #ifdef _has_x_slot_
-			rx = Realloc(rx, nnz_x, Type_x);
+			rx = R_Realloc(rx, nnz_x, Type_x);
 #endif
 		    }
 		    // 3) fill them ...
@@ -419,16 +417,22 @@ SEXP Csparse_subassign(SEXP x, SEXP i_, SEXP j_, SEXP value)
     }// for( jj )
 
     if(ctype_x == 1) { // triangularMatrix: copy the 'diag' and 'uplo' slots
-	slot_dup(ans, x, Matrix_uploSym);
-	slot_dup(ans, x, Matrix_diagSym);
+	SET_SLOT(ans, Matrix_uploSym, duplicate(GET_SLOT(x, Matrix_uploSym)));
+	SET_SLOT(ans, Matrix_diagSym, duplicate(GET_SLOT(x, Matrix_diagSym)));
     }
     // now assign the i- and x- slots,  free memory and return :
-    Memcpy(INTEGER(ALLOC_SLOT(ans, Matrix_iSym,  INTSXP, nnz)), ri, nnz);
+	PROTECT(islot = allocVector(INTSXP, nnz));
+	Memcpy(INTEGER(islot), ri, nnz);
+	SET_SLOT(ans, Matrix_iSym, islot);
+	UNPROTECT(1);
 #ifdef _has_x_slot_
-    Memcpy( STYP_x(ALLOC_SLOT(ans, Matrix_xSym,   SXP_x, nnz)), rx, nnz);
-    Free(rx);
+	PROTECT(islot = allocVector(SXP_x, nnz));
+	Memcpy(STYP_x(islot), rx, nnz);
+	SET_SLOT(ans, Matrix_xSym, islot);
+	UNPROTECT(1);
+    R_Free(rx);
 #endif
-    Free(ri);
+    R_Free(ri);
     UNPROTECT(n_prot);
     return ans;
 }

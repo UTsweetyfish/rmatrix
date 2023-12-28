@@ -1,17 +1,22 @@
-#ifndef MATRIX_FACTORS_H
-#define MATRIX_FACTORS_H
+#ifndef MATRIX_FACTORIZATIONS_H
+#define MATRIX_FACTORIZATIONS_H
 
-#include "Mutils.h"
+#include <Rinternals.h>
 
-SEXP MatrixFactorization_validate(SEXP obj);
-SEXP LU_validate(SEXP obj);
-SEXP BunchKaufman_validate(SEXP obj);
-SEXP pBunchKaufman_validate(SEXP obj);
-SEXP Cholesky_validate(SEXP obj);
-SEXP pCholesky_validate(SEXP obj);
-#ifdef _Matrix_has_SVD_
-SEXP SVD_validate(SEXP obj);
-#endif
-SEXP LU_expand(SEXP x);
+SEXP dgeMatrix_trf(SEXP, SEXP);
+SEXP dsyMatrix_trf(SEXP, SEXP);
+SEXP dspMatrix_trf(SEXP, SEXP);
+SEXP dpoMatrix_trf(SEXP, SEXP, SEXP, SEXP);
+SEXP dppMatrix_trf(SEXP, SEXP);
 
-#endif
+SEXP dgCMatrix_trf(SEXP, SEXP, SEXP, SEXP);
+SEXP dgCMatrix_orf(SEXP, SEXP, SEXP);
+SEXP dpCMatrix_trf(SEXP, SEXP, SEXP, SEXP, SEXP);
+
+SEXP BunchKaufman_expand(SEXP, SEXP);
+
+SEXP CHMfactor_diag_get(SEXP, SEXP);
+SEXP CHMfactor_update(SEXP, SEXP, SEXP);
+SEXP CHMfactor_updown(SEXP, SEXP, SEXP);
+
+#endif /* MATRIX_FACTORIZATIONS_H */
